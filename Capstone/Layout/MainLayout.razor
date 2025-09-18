@@ -1,0 +1,64 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@using Radzen.Blazor
+
+<div class="page">
+	<main>
+		<RadzenStack Orientation="Radzen.Orientation.Vertical">
+			<RadzenImage Path="images/logo.png"
+						 AlternateText="Travlr Getaways logo"
+						 Style="max-width: 15rem;" />
+			<RadzenRow JustifyContent="@Radzen.JustifyContent.Center">
+				<RadzenTabs SelectedIndex="@selectedIndex"
+							Change="@OnTabChange"
+							TabPosition="@TAB_POSITION"
+							RenderMode="@Radzen.TabRenderMode.Client">
+					<Tabs>
+						<RadzenTabsItem Text="Home"  />
+						<RadzenTabsItem Text="Travel" />
+						<RadzenTabsItem Text="Rooms" />
+						<RadzenTabsItem Text="Meals" />
+						<RadzenTabsItem Text="News" />
+						<RadzenTabsItem Text="About" />
+						<RadzenTabsItem Text="Contact" />
+					</Tabs>
+				</RadzenTabs>
+			</RadzenRow>
+		</RadzenStack>
+
+		<article class="content px-4">
+			@Body
+		</article>
+	</main>
+</div>
+
+@code {
+	private int selectedIndex = 0;
+
+	const Radzen.TabPosition TAB_POSITION = Radzen.TabPosition.Top;
+
+	private static Dictionary<int, string> _routeDict = new()
+	{
+		{0, "/"},
+		{1, "/travel"},
+		{2, "/rooms"},
+		{3, "/meals"},
+		{4, "/news"},
+		{5, "/about"},
+		{6, "/contact"}
+	};
+
+	private void OnTabChange(int index)
+	{
+		Console.WriteLine(index);
+		if (_routeDict.TryGetValue(index, out var route))
+		{
+			selectedIndex = index;
+			Navigation.NavigateTo(route);
+		}
+		else
+		{
+			throw new KeyNotFoundException("invalid index in tabs");
+		}
+	}
+}

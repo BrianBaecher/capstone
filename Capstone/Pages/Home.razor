@@ -1,0 +1,96 @@
+@page "/"
+@using System.Collections.Generic
+@using Radzen.Blazor
+
+<RadzenStack Orientation="Radzen.Orientation.Vertical">
+	<RadzenRow JustifyContent="Radzen.JustifyContent.Center">
+		<Capstone.Components.CarouselComponent/>
+	</RadzenRow>
+	<RadzenRow JustifyContent="Radzen.JustifyContent.Center">
+		<RadzenStack>
+			<RadzenRow>
+				<RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH5" Style="float: none; visibility: visible">
+					ENJOY THE SUMMER
+				</RadzenText>
+			</RadzenRow>
+			<RadzenRow>
+				<RadzenText>
+					text
+				</RadzenText>
+			</RadzenRow>
+		</RadzenStack>
+	</RadzenRow>
+
+	<RadzenStack>
+		<RadzenRow>
+			<RadzenColumn Style="width: 918px">
+				<RadzenCard>
+					<RadzenStack>
+						<RadzenRow>
+							<RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">
+								BLOG POSTS
+							</RadzenText>
+						</RadzenRow>
+						<RadzenRow>
+							<RadzenStack Style="margin: 10px; visibility: visible; float: none">
+
+								<RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH6">
+									BLOG TITLE
+								</RadzenText>
+
+								<RadzenText TextStyle="Radzen.Blazor.TextStyle.Subtitle1">
+									BLOG DATE
+								</RadzenText>
+
+								<RadzenText>
+									This rubric will be applied to your work as a whole; neither the artifact nor the narrative will be assessed on its own. The “Possible Indicators of Success” are examples of the types of concepts you and your instructor should look for to demonstrate competency. They are neither exhaustive nor prescriptive and should be used as guides for illustrating how your milestone embodies the category of improvement.
+								</RadzenText>
+
+							</RadzenStack>
+						</RadzenRow>
+						<RadzenRow>
+							<RadzenStack Style="margin: 10px; visibility: visible; float: none">
+
+								<RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH6">
+									BLOG TITLE
+								</RadzenText>
+
+								<RadzenText TextStyle="Radzen.Blazor.TextStyle.Subtitle1">
+									BLOG DATE
+								</RadzenText>
+
+								<RadzenText>
+									This rubric will be applied to your work as a whole; neither the artifact nor the narrative will be assessed on its own. The “Possible Indicators of Success” are examples of the types of concepts you and your instructor should look for to demonstrate competency. They are neither exhaustive nor prescriptive and should be used as guides for illustrating how your milestone embodies the category of improvement.
+								</RadzenText>
+
+							</RadzenStack>
+						</RadzenRow>
+					</RadzenStack>
+				</RadzenCard>
+			</RadzenColumn>
+			<RadzenColumn Size="4">
+				<RadzenText>IMG1</RadzenText>
+				<RadzenText>IMG2</RadzenText>
+				<RadzenText>IMG3</RadzenText>
+
+			</RadzenColumn>
+		</RadzenRow>
+	</RadzenStack>
+</RadzenStack>
+<RadzenFooter>Footer ligma</RadzenFooter>
+
+@code {
+	private List<Destination> FeaturedDestinations = new()
+	{
+		new Destination { Name = "Paris", Description = "The city of lights and love.", ImageUrl = "images/paris.jpg" },
+		new Destination { Name = "Tokyo", Description = "A vibrant blend of tradition and technology.", ImageUrl = "images/tokyo.jpg" },
+		new Destination { Name = "Sydney", Description = "Famous for its stunning harbor and Opera House.", ImageUrl = "images/sydney.jpg" }
+	};
+
+	public class Destination
+	{
+		public string Name { get; set; }
+		public string Description { get; set; }
+		public string ImageUrl { get; set; }
+	}
+}

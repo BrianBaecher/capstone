@@ -1,0 +1,18 @@
+﻿@page "/travel"
+@using Radzen.Blazor
+@using Capstone.Shared.Models;
+
+<h3>Travel</h3>
+
+<Capstone.Components.DestinationCard Destination="Ligma" />
+
+@code {
+	Destination Ligma = new()
+	{
+		Code="abc123",
+		ImageFilename="images/destinations/paris.avif",
+		Name = "Paris",
+		Description="Baguette, oui oui",
+		PricePerDay=420
+	};
+}

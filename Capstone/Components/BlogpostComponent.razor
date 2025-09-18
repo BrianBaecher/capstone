@@ -1,0 +1,45 @@
+﻿@using Radzen.Blazor
+@using Services
+@using Capstone.Shared.Models
+@inject BlogPostService blogService
+
+<RadzenCard>
+	<RadzenStack>
+		<RadzenRow>
+			<RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">
+				BLOG POSTS
+			</RadzenText>
+		</RadzenRow>
+		@foreach (var post in posts)
+		{
+			<RadzenRow>
+				<RadzenStack Style="margin: 10px; visibility: visible; float: none">
+
+					<RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH6">
+						@post.Title
+					</RadzenText>
+
+					<RadzenText TextStyle="Radzen.Blazor.TextStyle.Subtitle1">
+						@post.DateTime.ToShortDateString()
+					</RadzenText>
+
+					<RadzenText>
+						@post.Content
+					</RadzenText>
+
+				</RadzenStack>
+			</RadzenRow>
+		}
+	</RadzenStack>
+</RadzenCard>
+
+@code {
+	BlogPost[] posts = [];
+
+	protected override async Task OnInitializedAsync()
+	{
+		var postList = await blogService.GetLimited(2);
+
+		if (postList != null) posts = postList.ToArray();
+	}
+}

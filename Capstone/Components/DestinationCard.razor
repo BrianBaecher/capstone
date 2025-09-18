@@ -1,0 +1,27 @@
+﻿@using Radzen.Blazor
+@using Capstone.Shared.Models;
+
+<RadzenCard Variant="Radzen.Variant.Filled" class="rz-background-color-base-600 rz-w-75" Style="max-width: 500px">
+	<RadzenStack Orientation="Radzen.Orientation.Vertical" JustifyContent="Radzen.JustifyContent.Start" Gap="1rem" class="rz-p-4">
+		<RadzenRow>
+			<RadzenText TextStyle="TextStyle.DisplayH5">
+				@Destination.Name
+			</RadzenText>
+		</RadzenRow>
+		<RadzenImage Path=@Destination.GetImagePath() Style="max-width: 20rem"/>
+		<RadzenRow>
+			<RadzenText>
+				@Destination.Description
+			</RadzenText>
+		</RadzenRow>
+	</RadzenStack>
+</RadzenCard>
+
+
+@code {
+	[Parameter]
+	public Destination Destination { get; set; }
+
+	[Parameter]
+	public bool IsPreview { get; set; }
+}

@@ -1,0 +1,65 @@
+﻿@using Radzen.Blazor
+@using Capstone.Shared.Models
+@inject DestinationService API
+
+
+<RadzenCard class="rz-p-4"
+			Variant="Radzen.Variant.Outlined"
+			Style="max-width: 600px;">
+	<RadzenCarousel @ref=carousel
+					@bind-SelectedIndex="@selectedIndex"
+					Auto="@auto" Interval="@interval"
+					PagerOverlay="false"
+					ButtonShade="Radzen.Shade.Default"
+					Style="height:500px">
+		<Items>
+			@foreach (var dest in destinations)
+			{
+				<RadzenCarouselItem>
+					<DestinationCard Destination="dest"
+									 IsPreview=true />
+				</RadzenCarouselItem>
+			}
+		</Items>
+	</RadzenCarousel>
+</RadzenCard>
+
+
+@code {
+	RadzenCarousel carousel;
+
+	bool auto = true;
+	double interval = 4000;
+	string toggleText = "Stop";
+
+	Destination[] destinations = [];
+
+	bool started = true;
+	void Toggle()
+	{
+		if (started)
+		{
+			carousel.Stop();
+			toggleText = "Start";
+		}
+		else
+		{
+			carousel.Start();
+			toggleText = "Stop";
+		}
+
+		started = !started;
+	}
+
+	int selectedIndex;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		// get top destinations
+		destinations = await API.GetDestinationsAsync();
+
+	}
+}
