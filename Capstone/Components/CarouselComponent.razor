@@ -1,6 +1,8 @@
 ﻿@using Radzen.Blazor
 @using Capstone.Shared.Models
-@inject DestinationService API
+@inject DestinationService destService
+@inject TestimonialService testService
+
 
 
 <RadzenCard class="rz-p-4"
@@ -11,14 +13,33 @@
 					Auto="@auto" Interval="@interval"
 					PagerOverlay="false"
 					ButtonShade="Radzen.Shade.Default"
-					Style="height:500px">
+					Style=@GetCauroselStyle()>
 		<Items>
-			@foreach (var dest in destinations)
+			@if (isDestination)
 			{
-				<RadzenCarouselItem>
-					<DestinationCard Destination="dest"
-									 IsPreview=true />
-				</RadzenCarouselItem>
+				foreach (var dest in destinations)
+				{
+					<RadzenCarouselItem>
+						<DestinationCard Destination="dest"
+										 IsPreview=true />
+					</RadzenCarouselItem>
+				}
+			}
+			else if (isTestimonial)
+			{
+				foreach (var test in testimonials)
+				{
+					<RadzenCarouselItem>
+						<RadzenStack>
+							<RadzenText TextStyle="TextStyle.Body2">
+								@test.Content
+							</RadzenText>
+							<RadzenText TextStyle="TextStyle.Subtitle1">
+								@test.Author
+							</RadzenText>
+						</RadzenStack>
+					</RadzenCarouselItem>
+				}
 			}
 		</Items>
 	</RadzenCarousel>
@@ -26,6 +47,9 @@
 
 
 @code {
+	[Parameter]
+	public required Type ItemType { get; set; }
+
 	RadzenCarousel carousel;
 
 	bool auto = true;
@@ -33,6 +57,10 @@
 	string toggleText = "Stop";
 
 	Destination[] destinations = [];
+	bool isDestination;
+
+	Testimonial[] testimonials = [];
+	bool isTestimonial;
 
 	bool started = true;
 	void Toggle()
@@ -58,8 +86,26 @@
 	{
 		await base.OnInitializedAsync();
 
-		// get top destinations
-		destinations = await API.GetDestinationsAsync();
+		if (ItemType == typeof(Destination))
+		{
+			isDestination = true;
+			destinations = await destService.GetDestinationsAsync();
+		}
+		else if (ItemType == typeof(Testimonial))
+		{
+			isTestimonial = true;
+			var asList = await testService.GetAllAsync();
+			testimonials = asList.ToArray();
+		}
+		else
+		{
+			throw new Exception("Invalid type passed to caurosel");
+		}
 
+	}
+
+	private string GetCauroselStyle()
+	{
+		return isDestination ? "height:500px" : "height: 200px";
 	}
 }

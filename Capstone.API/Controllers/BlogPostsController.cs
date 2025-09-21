@@ -12,8 +12,8 @@ namespace Capstone.API.Controllers
 
 		public BlogPostsController(IMongoClient mongoClient)
 		{
-			var database = mongoClient.GetDatabase("CapstoneDb");
-			_blogPosts = database.GetCollection<BlogPost>("BlogPosts");
+			var database = mongoClient.GetDatabase("Capstone");
+			_blogPosts = database.GetCollection<BlogPost>("blogPosts");
 		}
 
 		[HttpGet]

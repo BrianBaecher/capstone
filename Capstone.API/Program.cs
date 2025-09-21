@@ -1,3 +1,5 @@
+using MongoDB.Driver;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +17,12 @@ builder.Services.AddCors(options =>
 			  .AllowAnyHeader());
 });
 
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+	var connectionString = builder.Configuration.GetConnectionString("MongoDb")
+						  ?? "mongodb://localhost:27017"; // fallback if not set
+	return new MongoClient(connectionString);
+});
 
 var app = builder.Build();
 
