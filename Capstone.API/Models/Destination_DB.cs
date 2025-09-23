@@ -1,9 +1,10 @@
-﻿using MongoDB.Bson;
+﻿using Capstone.Shared.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Capstone.Api.Models
 {
-	public partial class Destination
+	public class Destination_DB
 	{
 		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
@@ -24,5 +25,24 @@ namespace Capstone.Api.Models
 
 		[BsonElement("pricePerDay")]
 		public double PricePerDay { get; set; }
+
+
+
+		public Destination GetSharedModel()
+		{
+			if (this.Id == null)
+			{
+				throw new InvalidOperationException("");
+			}
+			return new Destination()
+			{
+				Id = Id,
+				Code = Code,
+				Name = Name,
+				ImageFilename = ImageFilename,
+				Description = Description,
+				PricePerDay = PricePerDay
+			};
+		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿namespace Capstone.Shared.Models
 {
-	public partial class Destination
+	public class Destination
 	{
 		public string Id { get; set; }
 		public string Code { get; set; }
