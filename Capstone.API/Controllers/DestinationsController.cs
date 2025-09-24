@@ -1,4 +1,5 @@
 using Capstone.Api.Models;
+using Capstone.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -25,7 +26,7 @@ namespace Capstone.API.Controllers
 		}
 
 		[HttpGet("{id:length(24)}", Name = "GetDestination")]
-		public async Task<ActionResult<Destination_DB>> Get(string id)
+		public async Task<ActionResult<Destination>> Get(string id)
 		{
 			var destination = await _destinations.Find(d => d.Id == id).FirstOrDefaultAsync();
 			if (destination == null)

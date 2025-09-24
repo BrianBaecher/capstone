@@ -1,0 +1,155 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@using Capstone.Shared.Models
+@inject DestinationService destinationService
+
+<RadzenTemplateForm Data="@newDestination" Submit="@((Destination d) => SubmitFunc!.Invoke())">
+	<RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4">
+		<RadzenColumn>
+			<RadzenStack>
+				<RadzenStack Gap="1rem">
+					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+						<RadzenFormField Text="Destination Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+							@if (IsEditForm && SelectedDestination != null)
+							{
+								// populate text fields with existing Destination information
+								<RadzenTextBox @bind-Value=@SelectedDestination.Name />
+							}
+							else
+							{
+								// or we are creating a new Destination
+								<RadzenTextBox @bind-Value=@newDestination.Name />
+							}
+						</RadzenFormField>
+					</RadzenRow>
+					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+						<RadzenFormField Text="Destination Code" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+							@if (IsEditForm && SelectedDestination != null)
+							{
+								<RadzenTextBox @bind-Value=@SelectedDestination.Code />
+							}
+							else
+							{
+								<RadzenTextBox @bind-Value=@newDestination.Code />
+							}
+						</RadzenFormField>
+					</RadzenRow>
+					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+						<RadzenFormField Text="Destination Description" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+							@if (IsEditForm && SelectedDestination != null)
+							{
+								<RadzenTextArea @bind-Value=@SelectedDestination.Description />
+							}
+							else
+							{
+								<RadzenTextArea @bind-Value=@newDestination.Description />
+							}
+						</RadzenFormField>
+					</RadzenRow>
+					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+						<RadzenFormField Text="Destination Code" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+							@if (IsEditForm && SelectedDestination != null)
+							{
+								<RadzenNumeric @bind-Value=@SelectedDestination.PricePerDay />
+							}
+							else
+							{
+								<RadzenNumeric Placeholder="0.00" @bind-Value=@newDestination.PricePerDay />
+							}
+						</RadzenFormField>
+					</RadzenRow>
+					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+						<RadzenFormField Text="Destination Image" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+							<RadzenFileInput @bind-FileName=@fileName
+											 @bind-FileSize=@fileSize
+											 @bind-Value=@imageData
+											 TValue="string"
+											 Style="width: 100%"
+											 Error=@(args => OnImageUploadError(args, "FileInput"))
+											 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})" />
+							@if (fileName != null && fileSize != null)
+							{
+								<RadzenFormField Text="File Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+									<RadzenTextBox @bind-Value=fileName />
+								</RadzenFormField>
+							}
+						</RadzenFormField>
+					</RadzenRow>
+				</RadzenStack>
+			</RadzenStack>
+		</RadzenColumn>
+	</RadzenRow>
+	<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
+		@if (IsEditForm)
+		{
+			<RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="arrow_upward" Text="Update" />
+		}
+		else
+		{
+			<RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="upwards arrow" Text="Create" />
+		}
+		<RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+	</RadzenStack>
+</RadzenTemplateForm>
+}
+
+
+@code {
+
+	[Parameter]
+	public bool IsEditForm { get; set; }
+
+	[Parameter]
+	public Destination? SelectedDestination { get; set; }
+
+	const Variant TEXT_BOX_VARIANT = Variant.Outlined;
+
+	Destination newDestination = new();
+
+	string? fileName;
+	long? fileSize;
+	string imageData = string.Empty;
+
+	void OnImageUploadError(UploadErrorEventArgs args, string name)
+	{
+	}
+
+	protected override Task OnInitializedAsync()
+	{
+		if (IsEditForm)
+		{
+			if (SelectedDestination == null)
+			{
+				throw new NullReferenceException("Cannot edit, SelectedDestination property is null");
+			}
+
+			SubmitFunc = OnEditSubmit;
+		}
+		else
+		{
+			SubmitFunc = OnCreateSubmit;
+		}
+		return Task.CompletedTask;
+	}
+
+	private void Cancel()
+	{
+
+	}
+
+	public Func<Task>? SubmitFunc; // on submit delegate. Set in Init depending on IsEditForm property.
+
+	private async Task OnEditSubmit()
+	{
+		if (SelectedDestination?.Id == null) return;
+
+		var isSuccess = await destinationService.UpdateByIdAsync(SelectedDestination.Id, SelectedDestination);
+		Console.WriteLine($"Edit Success? : {isSuccess}");
+	}
+
+	private async Task OnCreateSubmit()
+	{
+		var isSuccess = await destinationService.CreateDestinationAsync(newDestination);
+		Console.WriteLine($"Create Success? : {isSuccess}");
+	}
+}

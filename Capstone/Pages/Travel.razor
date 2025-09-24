@@ -4,15 +4,22 @@
 
 <h3>Travel</h3>
 
-<Capstone.Components.DestinationCard Destination="Ligma" />
+<Capstone.Components.AdminComponents.DestinationSelector OnSelection="SetDestinationToEdit" />
+
+@if (destinationToEdit != null)
+{
+	<Capstone.Components.AdminComponents.DestinationForm IsEditForm=true
+														 SelectedDestination="destinationToEdit" />
+}
 
 @code {
-	Destination Ligma = new()
+
+	Destination? destinationToEdit;
+
+	bool isCreateDestination;
+
+	private void SetDestinationToEdit(Destination d)
 	{
-		Code="abc123",
-		ImageFilename="images/destinations/paris.avif",
-		Name = "Paris",
-		Description="Baguette, oui oui",
-		PricePerDay=420
-	};
+		destinationToEdit = d;
+	}
 }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Capstone.Shared\CapstoneShared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
 </Project>

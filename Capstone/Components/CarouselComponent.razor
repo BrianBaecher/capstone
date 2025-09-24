@@ -89,7 +89,7 @@
 		if (ItemType == typeof(Destination))
 		{
 			isDestination = true;
-			destinations = await destService.GetDestinationsAsync();
+			destinations = await destService.GetAllAsync();
 		}
 		else if (ItemType == typeof(Testimonial))
 		{
