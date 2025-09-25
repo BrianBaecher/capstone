@@ -1,5 +1,6 @@
 ﻿@using Radzen
 @using Radzen.Blazor
+@using Capstone.Models
 @using Capstone.Shared.Models
 @inject DestinationService destinationService
 
@@ -14,7 +15,7 @@
 		<RadzenDataGridColumn Property="Name" Title="Name">
 			<Template Context="destination">
 				<RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
-					<RadzenImage Path="@destination.GetImagePath()" Style="width: 40px; height: 40px;" class="rz-border-radius-2" AlternateText="" />
+					<RadzenImage Path="@destination.GetImageUrl(AppConfigHelper.ApiBaseUrl)" Style="width: 40px; height: 40px;" class="rz-border-radius-2" AlternateText="" />
 					<RadzenStack Gap="0">
 						<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-0">@destination.Name</RadzenText>
 						<RadzenText TextStyle="TextStyle.Caption" class="rz-mb-0">@destination.Name</RadzenText>

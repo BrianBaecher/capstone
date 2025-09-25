@@ -13,11 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="wwwroot\images\destinations\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Capstone.Shared\CapstoneShared.csproj" />
   </ItemGroup>
 

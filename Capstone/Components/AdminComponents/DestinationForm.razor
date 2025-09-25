@@ -2,6 +2,7 @@
 @using Radzen.Blazor
 @using Capstone.Shared.Models
 @inject DestinationService destinationService
+@inject ImageService imageService;
 
 <RadzenTemplateForm Data="@newDestination" Submit="@((Destination d) => SubmitFunc!.Invoke())">
 	<RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4">
@@ -60,14 +61,14 @@
 					</RadzenRow>
 					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
 						<RadzenFormField Text="Destination Image" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-							<RadzenFileInput @bind-FileName=@fileName
-											 @bind-FileSize=@fileSize
-											 @bind-Value=@imageData
+							<RadzenFileInput @ref=@radzenFileInput
+											 @bind-FileName=fileName
 											 TValue="string"
 											 Style="width: 100%"
+											 Change="@(args => OnImageInputValueChange(args, radzenFileInput?.FileName ?? "null fileName"))"
 											 Error=@(args => OnImageUploadError(args, "FileInput"))
 											 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})" />
-							@if (fileName != null && fileSize != null)
+							@if (!string.IsNullOrEmpty(radzenFileInput?.FileName) && radzenFileInput?.FileSize != null)
 							{
 								<RadzenFormField Text="File Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
 									<RadzenTextBox @bind-Value=fileName />
@@ -89,13 +90,12 @@
 			<RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="upwards arrow" Text="Create" />
 		}
 		<RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+		<RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="LOG" Click="@LogHasImage" />
 	</RadzenStack>
 </RadzenTemplateForm>
 }
 
-
 @code {
-
 	[Parameter]
 	public bool IsEditForm { get; set; }
 
@@ -106,12 +106,22 @@
 
 	Destination newDestination = new();
 
-	string? fileName;
-	long? fileSize;
-	string imageData = string.Empty;
+	string fileName = string.Empty;
+
+	RadzenFileInput<string> radzenFileInput;
 
 	void OnImageUploadError(UploadErrorEventArgs args, string name)
 	{
+	}
+
+	private void OnImageInputValueChange(string val, string name)
+	{
+		Console.WriteLine("IMG CHANGE");
+		Console.WriteLine("val: " + radzenFileInput?.Value);
+		Console.WriteLine("HasValue: " + radzenFileInput?.HasValue);
+		Console.WriteLine("name: " + radzenFileInput?.FileName);
+
+
 	}
 
 	protected override Task OnInitializedAsync()
@@ -123,11 +133,11 @@
 				throw new NullReferenceException("Cannot edit, SelectedDestination property is null");
 			}
 
-			SubmitFunc = OnEditSubmit;
+			SubmitFunc = OnEditSubmitAsync;
 		}
 		else
 		{
-			SubmitFunc = OnCreateSubmit;
+			SubmitFunc = OnCreateSubmitAsync;
 		}
 		return Task.CompletedTask;
 	}
@@ -139,17 +149,54 @@
 
 	public Func<Task>? SubmitFunc; // on submit delegate. Set in Init depending on IsEditForm property.
 
-	private async Task OnEditSubmit()
+	private async Task OnEditSubmitAsync()
 	{
 		if (SelectedDestination?.Id == null) return;
 
+		if (SubmissionIncludesImage() && !string.IsNullOrEmpty(radzenFileInput?.FileName))
+		{
+			// is the provided filename available?
+			var nameRes = await imageService.CheckDestinationImageFilenameAvailableAsync(radzenFileInput!.FileName);
+
+			if (!nameRes.IsSuccessStatusCode)
+			{
+				Console.WriteLine(nameRes.StatusCode);
+				Console.WriteLine(nameRes.Content);
+
+				//TODO: broadcast some message with failure info?
+				return;
+			}
+
+			var imageRes = await imageService.UploadDestinationImageAsync(radzenFileInput!.Value, radzenFileInput!.FileName);
+
+			if (imageRes)
+			{
+				Console.WriteLine("image should have been uploaded and saved successfully (as .avif)");
+				SelectedDestination.ImageFilename = Path.GetFileNameWithoutExtension(radzenFileInput!.FileName);
+			}
+		}
+
+		// FIXME: may need to return a new copy of edited obj to reflect updates.
 		var isSuccess = await destinationService.UpdateByIdAsync(SelectedDestination.Id, SelectedDestination);
 		Console.WriteLine($"Edit Success? : {isSuccess}");
 	}
 
-	private async Task OnCreateSubmit()
+	private async Task OnCreateSubmitAsync()
 	{
 		var isSuccess = await destinationService.CreateDestinationAsync(newDestination);
 		Console.WriteLine($"Create Success? : {isSuccess}");
+	}
+
+	private void LogHasImage()
+	{
+		Console.WriteLine("==========IMG LOG=============");
+		Console.WriteLine("val: " + radzenFileInput?.Value);
+		Console.WriteLine("HasValue: " + radzenFileInput?.HasValue);
+		Console.WriteLine("name: " + radzenFileInput?.FileName);
+	}
+
+	private bool SubmissionIncludesImage()
+	{
+		return radzenFileInput?.HasValue ?? false;
 	}
 }

@@ -9,10 +9,11 @@
 		public string Description { get; set; }
 		public double PricePerDay { get; set; }
 
-
-		public string GetImagePath()
+		public string GetImageUrl(string baseApiUrl)
 		{
-			return $"images/destinations/{ImageFilename}";
+			string imgUrl = $"{baseApiUrl}/images/destinations/{ImageFilename}";
+			//Console.WriteLine(imgUrl);
+			return imgUrl;
 		}
 	}
 }

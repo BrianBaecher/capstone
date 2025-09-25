@@ -19,6 +19,9 @@ public class DestinationService
 	public async Task<bool> UpdateByIdAsync(string id, Destination destination)
 	{
 		Console.WriteLine(id);
+
+		EnsureAvifExtension(destination);
+
 		var response = await _httpClient.PutAsJsonAsync($"{URI}/{id}", destination);
 		return response.IsSuccessStatusCode;
 	}
@@ -27,5 +30,15 @@ public class DestinationService
 	{
 		var res = await _httpClient.PostAsJsonAsync<Destination>(URI, d);
 		return res.IsSuccessStatusCode;
+	}
+
+
+	private static void EnsureAvifExtension(Destination d)
+	{
+		// ensure destination image filename has extension (all uploaded images are converted to .avif)
+		if (!Path.HasExtension(d.ImageFilename) || Path.GetExtension(d.ImageFilename) != ".avif")
+		{
+			d.ImageFilename = Path.ChangeExtension(d.ImageFilename, ".avif");
+		}
 	}
 }

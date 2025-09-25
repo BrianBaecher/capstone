@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.StaticFiles;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,5 +41,18 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseCors("AllowAll");
+
+// allow serving of static files (included for images)
+app.UseStaticFiles(new StaticFileOptions
+{
+	// API URL can't seem to communicate .avif files, trying this...
+	ContentTypeProvider = new FileExtensionContentTypeProvider
+	{
+		Mappings =
+		{
+			[".avif"]="image/avif"
+		}
+	}
+});
 
 app.Run();

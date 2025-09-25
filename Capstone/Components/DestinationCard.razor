@@ -1,4 +1,5 @@
 ﻿@using Radzen.Blazor
+@using Capstone.Models
 @using Capstone.Shared.Models;
 
 <RadzenCard Variant="Radzen.Variant.Filled" class="rz-background-color-base-600 rz-w-75" Style="max-width: 500px">
@@ -12,7 +13,7 @@
 				@Destination.Name
 			</RadzenText>
 		</RadzenRow>
-		<RadzenImage Path=@Destination.GetImagePath() Style="max-width: 20rem" />
+		<RadzenImage Path=@Destination.GetImageUrl(AppConfigHelper.ApiBaseUrl) Style="max-width: 20rem" />
 		<RadzenRow>
 			<RadzenText>
 				@Destination.Description
