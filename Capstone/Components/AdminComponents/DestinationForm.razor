@@ -1,180 +1,178 @@
 ﻿@using Radzen
 @using Radzen.Blazor
 @using Capstone.Shared.Models
+@using Capstone.Services
 @inject DestinationService destinationService
 @inject ImageService imageService;
 
-<RadzenTemplateForm Data="@newDestination" Submit="@((Destination d) => SubmitFunc!.Invoke())">
-	<RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4">
-		<RadzenColumn>
-			<RadzenStack>
-				<RadzenStack Gap="1rem">
-					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-						<RadzenFormField Text="Destination Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-							@if (IsEditForm && SelectedDestination != null)
-							{
-								// populate text fields with existing Destination information
-								<RadzenTextBox @bind-Value=@SelectedDestination.Name />
-							}
-							else
-							{
-								// or we are creating a new Destination
-								<RadzenTextBox @bind-Value=@newDestination.Name />
-							}
-						</RadzenFormField>
-					</RadzenRow>
-					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-						<RadzenFormField Text="Destination Code" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-							@if (IsEditForm && SelectedDestination != null)
-							{
-								<RadzenTextBox @bind-Value=@SelectedDestination.Code />
-							}
-							else
-							{
-								<RadzenTextBox @bind-Value=@newDestination.Code />
-							}
-						</RadzenFormField>
-					</RadzenRow>
-					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-						<RadzenFormField Text="Destination Description" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-							@if (IsEditForm && SelectedDestination != null)
-							{
-								<RadzenTextArea @bind-Value=@SelectedDestination.Description />
-							}
-							else
-							{
-								<RadzenTextArea @bind-Value=@newDestination.Description />
-							}
-						</RadzenFormField>
-					</RadzenRow>
-					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-						<RadzenFormField Text="Destination Code" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-							@if (IsEditForm && SelectedDestination != null)
-							{
-								<RadzenNumeric @bind-Value=@SelectedDestination.PricePerDay />
-							}
-							else
-							{
-								<RadzenNumeric Placeholder="0.00" @bind-Value=@newDestination.PricePerDay />
-							}
-						</RadzenFormField>
-					</RadzenRow>
-					<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-						<RadzenFormField Text="Destination Image" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-							<RadzenFileInput @ref=@radzenFileInput
-											 @bind-FileName=fileName
-											 TValue="string"
-											 Style="width: 100%"
-											 Change="@(args => OnImageInputValueChange(args, radzenFileInput?.FileName ?? "null fileName"))"
-											 Error=@(args => OnImageUploadError(args, "FileInput"))
-											 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})" />
-							@if (!string.IsNullOrEmpty(radzenFileInput?.FileName) && radzenFileInput?.FileSize != null)
-							{
-								<RadzenFormField Text="File Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
-									<RadzenTextBox @bind-Value=fileName />
-								</RadzenFormField>
-							}
-						</RadzenFormField>
-					</RadzenRow>
+@if (formModel == null)
+{
+	<p>load</p>
+}
+else
+{
+	<RadzenTemplateForm Data="@formModel" Submit="@(async (Destination d) => { await SubmitFunc!.Invoke(); })">
+		<RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4">
+			<RadzenColumn>
+				<RadzenStack>
+					<RadzenStack Gap="1rem">
+						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+							<RadzenFormField Text="Destination Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+								<RadzenTextBox @bind-Value=@formModel!.Name />
+							</RadzenFormField>
+						</RadzenRow>
+						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+							<RadzenFormField Text="Destination Code" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+								<RadzenStack>
+									@if (isCodeInvalid)
+									{
+										<RadzenText TextStyle="TextStyle.Body1" class="rz-background-color-danger-light">
+											@invalidCodeMessage
+										</RadzenText>
+										<RadzenButton ButtonType="ButtonType.Reset" Icon="autorenew" Click="@((a) => OnCodeFieldResetClick(a))" />
+									}
+									<RadzenTextBox @bind-Value=@formModel!.Code />
+								</RadzenStack>
+							</RadzenFormField>
+						</RadzenRow>
+						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+							<RadzenFormField Text="Destination Description" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+								<RadzenTextArea @bind-Value=@formModel.Description />
+							</RadzenFormField>
+						</RadzenRow>
+						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+							<RadzenFormField Text="Destination Price" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+								<RadzenNumeric Placeholder="0.00" @bind-Value=@formModel!.PricePerDay />
+							</RadzenFormField>
+						</RadzenRow>
+						<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+							<RadzenFormField Text="Destination Image" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+								<RadzenFileInput @ref=@radzenFileInput
+												 @bind-FileName=fileName
+												 TValue="string"
+												 Style="width: 100%"
+												 Change="@(args => OnImageInputValueChange(args, radzenFileInput?.FileName ?? "null fileName"))"
+												 Error=@(args => OnImageUploadError(args, "FileInput"))
+												 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})" />
+								@if (radzenFileInput != null && radzenFileInput.HasValue)
+								{
+									<RadzenStack>
+										@if (isFilenameInvalid)
+										{
+											<RadzenText TextStyle="TextStyle.Body1" class="rz-background-color-danger-light">
+												@invalidFilenameMessage
+											</RadzenText>
+										}
+										<RadzenFormField Text="File Name" Variant="@TEXT_BOX_VARIANT" Style="width: 80%;">
+											<RadzenTextBox @bind-Value=fileName />
+										</RadzenFormField>
+									</RadzenStack>
+								}
+							</RadzenFormField>
+						</RadzenRow>
+					</RadzenStack>
 				</RadzenStack>
-			</RadzenStack>
-		</RadzenColumn>
-	</RadzenRow>
-	<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
-		@if (IsEditForm)
-		{
-			<RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="arrow_upward" Text="Update" />
-		}
-		else
-		{
-			<RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="upwards arrow" Text="Create" />
-		}
-		<RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
-		<RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="LOG" Click="@LogHasImage" />
-	</RadzenStack>
-</RadzenTemplateForm>
+			</RadzenColumn>
+		</RadzenRow>
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
+			<RadzenButton ButtonType="ButtonType.Submit"
+						  Size="ButtonSize.Large"
+						  Icon="arrow_upward"
+						  Text=@(IsUpdateForm ? "Update" : "Create") />
+
+			<RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+		</RadzenStack>
+	</RadzenTemplateForm>
+}
 }
 
 @code {
 	[Parameter]
-	public bool IsEditForm { get; set; }
+	public bool IsUpdateForm { get; set; }
 
 	[Parameter]
 	public Destination? SelectedDestination { get; set; }
 
+	[Parameter]
+	public EventCallback OnCancelForm { get; set; }
+
 	const Variant TEXT_BOX_VARIANT = Variant.Outlined;
 
-	Destination newDestination = new();
+	Func<Task>? SubmitFunc; // on submit delegate. Set in Init depending on IsUpdateForm property.
 
+	Destination? formModel;
+	Destination? selectedDestinationCLONE; // A value-copy (clone) of the original SelectedDestination parameter. Set in blazor oninitasync, used to discern what fields have changed in form when editing/updating.
+
+
+	RadzenFileInput<string>? radzenFileInput; // component ref
 	string fileName = string.Empty;
+	bool isFilenameInvalid;
+	string invalidFilenameMessage = string.Empty;
 
-	RadzenFileInput<string> radzenFileInput;
+	bool isCodeInvalid;
+	string invalidCodeMessage = string.Empty;
 
 	void OnImageUploadError(UploadErrorEventArgs args, string name)
 	{
+
 	}
 
 	private void OnImageInputValueChange(string val, string name)
 	{
+		// don't think I need this...
 		Console.WriteLine("IMG CHANGE");
 		Console.WriteLine("val: " + radzenFileInput?.Value);
 		Console.WriteLine("HasValue: " + radzenFileInput?.HasValue);
 		Console.WriteLine("name: " + radzenFileInput?.FileName);
-
-
 	}
 
 	protected override Task OnInitializedAsync()
 	{
-		if (IsEditForm)
+		// is this form adding or updating a destination?
+		if (IsUpdateForm)
 		{
 			if (SelectedDestination == null)
 			{
 				throw new NullReferenceException("Cannot edit, SelectedDestination property is null");
 			}
-
-			SubmitFunc = OnEditSubmitAsync;
+			formModel = SelectedDestination;
+			SubmitFunc = OnUpdateSubmitAsync;
+			selectedDestinationCLONE = SelectedDestination.Clone();
 		}
 		else
 		{
+			formModel = new();
 			SubmitFunc = OnCreateSubmitAsync;
 		}
 		return Task.CompletedTask;
 	}
 
-	private void Cancel()
+	private async Task Cancel()
 	{
-
+		await OnCancelForm.InvokeAsync();
+		formModel = null;
 	}
 
-	public Func<Task>? SubmitFunc; // on submit delegate. Set in Init depending on IsEditForm property.
-
-	private async Task OnEditSubmitAsync()
+	private async Task OnUpdateSubmitAsync()
 	{
 		if (SelectedDestination?.Id == null) return;
 
-		if (SubmissionIncludesImage() && !string.IsNullOrEmpty(radzenFileInput?.FileName))
+		// examine what's changed, in order to validate fields
+		// the clone holds the original values of the properties in SelectedDestination, so we check the replacements, and restore originals if need be?
+		var changes = Destination.CompareFields(SelectedDestination, selectedDestinationCLONE!);
+
+		if (changes.CodeChanged)
 		{
-			// is the provided filename available?
-			var nameRes = await imageService.CheckDestinationImageFilenameAvailableAsync(radzenFileInput!.FileName);
+			// is new code unique?
+			var isUnique = await CheckCodeUniqueness(SelectedDestination.Code);
 
-			if (!nameRes.IsSuccessStatusCode)
-			{
-				Console.WriteLine(nameRes.StatusCode);
-				Console.WriteLine(nameRes.Content);
+			isCodeInvalid = !isUnique; // kind of strangely written, but if it isn't unique then it IS invalid...
+			invalidCodeMessage = !isUnique ? $"Destination code: '{SelectedDestination.Code}' is already in use. Enter a new value or revert to original." : string.Empty;
 
-				//TODO: broadcast some message with failure info?
-				return;
-			}
-
-			var imageRes = await imageService.UploadDestinationImageAsync(radzenFileInput!.Value, radzenFileInput!.FileName);
-
-			if (imageRes)
-			{
-				Console.WriteLine("image should have been uploaded and saved successfully (as .avif)");
-				SelectedDestination.ImageFilename = Path.GetFileNameWithoutExtension(radzenFileInput!.FileName);
-			}
+			if (!isUnique) return;
 		}
+
+		await HandleImageSubmission(SelectedDestination);
 
 		// FIXME: may need to return a new copy of edited obj to reflect updates.
 		var isSuccess = await destinationService.UpdateByIdAsync(SelectedDestination.Id, SelectedDestination);
@@ -183,20 +181,59 @@
 
 	private async Task OnCreateSubmitAsync()
 	{
-		var isSuccess = await destinationService.CreateDestinationAsync(newDestination);
+		if (formModel == null) return; // shouldn't be possible...
+
+		await HandleImageSubmission(formModel);
+
+		var isSuccess = await destinationService.CreateDestinationAsync(formModel);
 		Console.WriteLine($"Create Success? : {isSuccess}");
 	}
 
-	private void LogHasImage()
+	private async Task HandleImageSubmission(Destination destination)
 	{
-		Console.WriteLine("==========IMG LOG=============");
-		Console.WriteLine("val: " + radzenFileInput?.Value);
-		Console.WriteLine("HasValue: " + radzenFileInput?.HasValue);
-		Console.WriteLine("name: " + radzenFileInput?.FileName);
+		if (radzenFileInput == null) return;
+
+		if (radzenFileInput.HasValue && !string.IsNullOrEmpty(radzenFileInput.FileName))
+		{
+			// is the provided filename available?
+			var nameRes = await imageService.CheckDestinationImageFilenameAvailableAsync(radzenFileInput.FileName);
+
+			if (!nameRes.IsSuccessStatusCode)
+			{
+				//TODO: broadcast some message with failure info?
+				isFilenameInvalid = true;
+				invalidFilenameMessage = await nameRes.Content.ReadAsStringAsync() ?? "Something went wrong. Try using a different filename.";
+				return;
+			}
+
+			var isImageUploadSuccess = await imageService.UploadDestinationImageAsync(radzenFileInput.Value, radzenFileInput.FileName);
+
+			if (isImageUploadSuccess)
+			{
+				// note - path/extension validation happens through the call to DestinationService, so just the extension-free name is fine here.
+				destination.ImageFilename = Path.GetFileNameWithoutExtension(radzenFileInput.FileName);
+			}
+		}
 	}
 
-	private bool SubmissionIncludesImage()
+	private async Task<bool> CheckCodeUniqueness(string destinationCode)
 	{
-		return radzenFileInput?.HasValue ?? false;
+		// FIXME: what about updating existing destinations?
+		// done that, as when changes are examined with update/edits, this only gets called when the "Code" has changed its original value.
+		return await destinationService.IsDestinationCodeUnique(destinationCode);
 	}
+
+	private void OnCodeFieldResetClick(MouseEventArgs _)
+	{
+		if (formModel == null) return;
+
+		// clone is not null when IsUpdateForm is true.
+		formModel.Code = IsUpdateForm ? selectedDestinationCLONE!.Code : string.Empty;
+
+		// either way the invalid code message should be cleared.
+		isCodeInvalid = false;
+	}
+
+
 }
+

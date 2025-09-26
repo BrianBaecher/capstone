@@ -1,11 +1,48 @@
 @page "/admin"
-@using Capstone.Shared.Models
-@inject HttpClient Http
-
-<h3>Admin: Manage Travel Packages</h3>
+@using Radzen.Blazor
+@using Capstone.Shared.Models;
 
 
+<RadzenStack>
+	<Capstone.Components.AdminComponents.DestinationSelector OnSelection="OnUpdateSelection" />
+
+	<RadzenRow>
+		<RadzenButton ButtonStyle="Radzen.ButtonStyle.Base"
+					  Text="Create Destination"
+					  Icon="add"
+					  Click="@((args) => OnCreateButtonPress(args))" />
+
+	</RadzenRow>
+
+	@if (_destination != null)
+	{
+		<Capstone.Components.AdminComponents.DestinationForm IsUpdateForm=isUpdate
+															 SelectedDestination="isUpdate ? _destination : null"
+															 OnCancelForm="OnCancelForm" />
+	}
+</RadzenStack>
 
 @code {
 
+	bool isUpdate;
+
+	Destination? _destination;
+
+	private void OnUpdateSelection(Destination d)
+	{
+		isUpdate = true;
+		_destination = d;
+	}
+
+	private void OnCreateButtonPress(MouseEventArgs _)
+	{
+		isUpdate = false;
+		_destination = new();
+	}
+
+	private void OnCancelForm()
+	{
+		// essentially resetting the destination form component, clear current destination object.
+		_destination = null;
+	}
 }

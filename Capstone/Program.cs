@@ -1,6 +1,5 @@
 using Capstone;
 using Capstone.Models;
-using Capstone.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -23,11 +22,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(AppConfigHelper.ApiBaseUrl) });
 
-// adding services for API communications
-builder.Services.AddScoped<DestinationService>();
-builder.Services.AddScoped<BlogPostService>();
-builder.Services.AddScoped<TestimonialService>();
-builder.Services.AddScoped<TravelPackageService>();
-builder.Services.AddScoped<ImageService>();
+// adding services via static helper
+AppConfigHelper.ServiceManager.RegisterServices(builder);
 
 await builder.Build().RunAsync();

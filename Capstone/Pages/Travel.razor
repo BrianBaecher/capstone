@@ -2,24 +2,10 @@
 @using Radzen.Blazor
 @using Capstone.Shared.Models;
 
-<h3>Travel</h3>
 
-<Capstone.Components.AdminComponents.DestinationSelector OnSelection="SetDestinationToEdit" />
+<RadzenStack>
 
-@if (destinationToEdit != null)
-{
-	<Capstone.Components.AdminComponents.DestinationForm IsEditForm=true
-														 SelectedDestination="destinationToEdit" />
-}
+</RadzenStack>
 
 @code {
-
-	Destination? destinationToEdit;
-
-	bool isCreateDestination;
-
-	private void SetDestinationToEdit(Destination d)
-	{
-		destinationToEdit = d;
-	}
 }

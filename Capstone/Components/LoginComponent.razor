@@ -1,0 +1,51 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@using Capstone.Services
+@using Capstone.Shared.Models
+@inject AuthService authService
+@inject SessionState sessionState
+@inject DialogService dialogService // login displayed as modal, dialogService handles modals...
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+	<RadzenTemplateForm Data=@("LoginWithDefaultValues")>
+		<RadzenLogin AllowRegister="true" AllowResetPassword="true" Username=@username Password=@password
+					 AllowRememberMe="true" RememberMe="@rememberMe"
+					 Login=@(args => OnLogin(args))
+					 ResetPassword=@(args => OnResetPassword(args))
+					 Register=@(_ => OnRegister()) />
+	</RadzenTemplateForm>
+</RadzenCard>
+
+@code {
+	string username = string.Empty;
+	string password = string.Empty;
+	bool rememberMe;
+
+	private async Task OnLogin(LoginArgs loginArgs)
+	{
+		var user = await authService.LoginAsync(loginArgs.Username, loginArgs.Password);
+		if(user == null)
+		{
+			// failed login
+			return;
+		}
+		// set active user?
+		sessionState.SetUser(user);
+		Close();
+	}
+
+	private void OnResetPassword(string arg)
+	{
+
+	}
+
+	private void OnRegister()
+	{
+
+	}
+
+	private void Close()
+	{
+		dialogService.Close();
+	}
+}

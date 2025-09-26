@@ -18,6 +18,7 @@ namespace Capstone.API.Controllers
 			_destinations = database.GetCollection<Destination_DB>("destinations");
 		}
 
+		#region basic CRUD
 		[HttpGet]
 		public async Task<ActionResult<List<Destination_DB>>> Get()
 		{
@@ -58,5 +59,16 @@ namespace Capstone.API.Controllers
 				return NotFound();
 			return NoContent();
 		}
+		#endregion
+
+		[HttpGet("destination-code/isunique")]
+		public async Task<bool> GetIsDestinationCodeUnique([FromQuery] string code)
+		{
+			// note - destination code field has its uniqueness enforced by an index in the destinations collection. 
+			// this method just checks to see if any destination currently has the 'code' string argument as its Code.
+			var entry = await _destinations.Find(d => d.Code == code).FirstOrDefaultAsync();
+			return entry == null;
+		}
+
 	}
 }
