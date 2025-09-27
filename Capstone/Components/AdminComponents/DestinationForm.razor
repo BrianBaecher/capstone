@@ -11,7 +11,7 @@
 }
 else
 {
-	<RadzenTemplateForm Data="@formModel" Submit="@(async (Destination d) => { await SubmitFunc!.Invoke(); })">
+	<RadzenTemplateForm Data="@formModel" Submit="@(async (Destination d) => { await SubmitFunc!.Invoke(d); })">
 		<RadzenRow Gap="2rem" class="rz-p-0 rz-p-lg-4">
 			<RadzenColumn>
 				<RadzenStack>
@@ -98,11 +98,9 @@ else
 
 	const Variant TEXT_BOX_VARIANT = Variant.Outlined;
 
-	Func<Task>? SubmitFunc; // on submit delegate. Set in Init depending on IsUpdateForm property.
+	Func<Destination, Task>? SubmitFunc; // on submit delegate. Set in Init depending on IsUpdateForm property.
 
 	Destination? formModel;
-	Destination? selectedDestinationCLONE; // A value-copy (clone) of the original SelectedDestination parameter. Set in blazor oninitasync, used to discern what fields have changed in form when editing/updating.
-
 
 	RadzenFileInput<string>? radzenFileInput; // component ref
 	string fileName = string.Empty;
@@ -135,9 +133,8 @@ else
 			{
 				throw new NullReferenceException("Cannot edit, SelectedDestination property is null");
 			}
-			formModel = SelectedDestination;
+			formModel = SelectedDestination.Clone(); // value-copy of SelectedDestination parameter
 			SubmitFunc = OnUpdateSubmitAsync;
-			selectedDestinationCLONE = SelectedDestination.Clone();
 		}
 		else
 		{
@@ -153,39 +150,39 @@ else
 		formModel = null;
 	}
 
-	private async Task OnUpdateSubmitAsync()
+	private async Task OnUpdateSubmitAsync(Destination d)
 	{
-		if (SelectedDestination?.Id == null) return;
+		if (SelectedDestination?.Id == null || d == null) return;
 
 		// examine what's changed, in order to validate fields
 		// the clone holds the original values of the properties in SelectedDestination, so we check the replacements, and restore originals if need be?
-		var changes = Destination.CompareFields(SelectedDestination, selectedDestinationCLONE!);
+		var changes = Destination.CompareFields(SelectedDestination, d);
 
 		if (changes.CodeChanged)
 		{
 			// is new code unique?
-			var isUnique = await CheckCodeUniqueness(SelectedDestination.Code);
+			var isUnique = await CheckCodeUniqueness(d.Code);
 
 			isCodeInvalid = !isUnique; // kind of strangely written, but if it isn't unique then it IS invalid...
-			invalidCodeMessage = !isUnique ? $"Destination code: '{SelectedDestination.Code}' is already in use. Enter a new value or revert to original." : string.Empty;
+			invalidCodeMessage = !isUnique ? $"Destination code: '{d.Code}' is already in use. Enter a new value or revert to original." : string.Empty;
 
 			if (!isUnique) return;
 		}
 
-		await HandleImageSubmission(SelectedDestination);
+		await HandleImageSubmission(d);
 
 		// FIXME: may need to return a new copy of edited obj to reflect updates.
-		var isSuccess = await destinationService.UpdateByIdAsync(SelectedDestination.Id, SelectedDestination);
+		var isSuccess = await destinationService.UpdateByIdAsync(SelectedDestination.Id, d);
 		Console.WriteLine($"Edit Success? : {isSuccess}");
 	}
 
-	private async Task OnCreateSubmitAsync()
+	private async Task OnCreateSubmitAsync(Destination d)
 	{
-		if (formModel == null) return; // shouldn't be possible...
+		if (d == null) return; // shouldn't be possible...
 
-		await HandleImageSubmission(formModel);
+		await HandleImageSubmission(d);
 
-		var isSuccess = await destinationService.CreateDestinationAsync(formModel);
+		var isSuccess = await destinationService.CreateDestinationAsync(d);
 		Console.WriteLine($"Create Success? : {isSuccess}");
 	}
 
@@ -225,10 +222,10 @@ else
 
 	private void OnCodeFieldResetClick(MouseEventArgs _)
 	{
-		if (formModel == null) return;
+		if (formModel == null || SelectedDestination == null) return;
 
-		// clone is not null when IsUpdateForm is true.
-		formModel.Code = IsUpdateForm ? selectedDestinationCLONE!.Code : string.Empty;
+		// clone is not null when IsUpdateForm is true. Revert to original (stored in Parameter)
+		formModel.Code = IsUpdateForm ? SelectedDestination.Code : string.Empty;
 
 		// either way the invalid code message should be cleared.
 		isCodeInvalid = false;
