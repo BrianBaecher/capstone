@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Capstone.Shared.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 
@@ -22,5 +23,22 @@ namespace Capstone.API.Models
 
 		[BsonElement("role")]
 		public string Role { get; set; }
+
+
+		public User GetSharedModel()
+		{
+			if (this.Id == null)
+			{
+				throw new InvalidOperationException("");
+			}
+			return new User()
+			{
+				Id = Id,
+				Username = Username,
+				Password = Password,
+				Email = Email,
+				Role = Role
+			};
+		}
 	}
 }

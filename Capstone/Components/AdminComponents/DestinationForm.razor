@@ -1,6 +1,4 @@
-﻿@using Radzen
-@using Radzen.Blazor
-@using Capstone.Shared.Models
+﻿@using Capstone.Shared.Models
 @using Capstone.Services
 @inject DestinationService destinationService
 @inject ImageService imageService;
@@ -95,6 +93,8 @@ else
 
 	[Parameter]
 	public EventCallback OnCancelForm { get; set; }
+
+	
 
 	const Variant TEXT_BOX_VARIANT = Variant.Outlined;
 

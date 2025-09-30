@@ -30,15 +30,13 @@ namespace Capstone.Models
 			// stores all the types of services used in webassembly program, and the lifetime of service.
 			private static readonly (Type type, ServiceLifetime lifetime)[] Services = new[]
 			{
-				// scoped
 				(typeof(DestinationService), ServiceLifetime.Scoped),
 				(typeof(BlogPostService), ServiceLifetime.Scoped),
 				(typeof(ImageService), ServiceLifetime.Scoped),
 				(typeof(TestimonialService), ServiceLifetime.Scoped),
 				(typeof(TravelPackageService), ServiceLifetime.Scoped),
 				(typeof(DialogService), ServiceLifetime.Scoped), // Radzen service type, not my creation.
-				// singletons
-				(typeof(AuthService), ServiceLifetime.Singleton),
+				(typeof(AuthService), ServiceLifetime.Scoped),
 				(typeof(SessionState), ServiceLifetime.Singleton),
 			};
 

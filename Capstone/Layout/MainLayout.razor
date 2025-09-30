@@ -2,10 +2,11 @@
 @inject NavigationManager Navigation
 @inject Capstone.Services.SessionState sessionState
 @inject Radzen.DialogService dialogService
-@using Radzen.Blazor
+@using Microsoft.AspNetCore.Components;
 
 <div class="page">
 	<main>
+		<RadzenComponents @rendermode="RenderMode.InteractiveWebAssembly" />
 		<RadzenStack Orientation="Radzen.Orientation.Vertical">
 			<RadzenRow JustifyContent="Radzen.JustifyContent.SpaceBetween">
 				<RadzenImage Path="images/logo.png"
