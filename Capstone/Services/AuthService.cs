@@ -13,10 +13,10 @@ public class AuthService
 		_httpClient = httpClient;
 	}
 
-	public async Task<User?> LoginAsync(string username, string password)
+	public async Task<LoginResponse?> LoginAsync(string username, string password)
 	{
 		//TODO: hash
-		var loginUser = new User() { Username = username, Password = password };
+		var loginUser = new LoginRequest() { Username = username, Password = password };
 
 		var json = JsonSerializer.Serialize(loginUser);
 		Console.WriteLine(json);
@@ -24,15 +24,29 @@ public class AuthService
 
 		if (response.IsSuccessStatusCode)
 		{
-			var user = await response.Content.ReadFromJsonAsync<User>();
+			var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-			// TODO: store user info or token here (e.g., in local storage)
-			Console.WriteLine($"User {user?.Username} logged in");
-			return user;
+			// TODO: store loginResponse info or token here (e.g., in local storage)
+			Console.WriteLine($"User {loginResponse?.User.Username} logged in");
+			return loginResponse;
 		}
 		Console.WriteLine("login failure");
 		Console.WriteLine(response.ReasonPhrase);
 		Console.WriteLine(username + ":" + password);
+		return null;
+	}
+
+	public async Task<LoginResponse?> RegisterAsync(RegistrationInfo info)
+	{
+		var request = await _httpClient.PostAsJsonAsync($"{URI}/register", info);
+		if (request.IsSuccessStatusCode)
+		{
+			Console.WriteLine("Registration success code");
+			var loginResponse = await request.Content.ReadFromJsonAsync<LoginResponse>();
+
+			return loginResponse;
+		}
+		Console.WriteLine("Registration fail");
 		return null;
 	}
 

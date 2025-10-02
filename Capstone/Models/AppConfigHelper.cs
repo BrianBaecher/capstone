@@ -1,4 +1,5 @@
-﻿using Capstone.Services;
+﻿using Blazored.LocalStorage;
+using Capstone.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
 using System.Text.Json;
@@ -37,7 +38,7 @@ namespace Capstone.Models
 				(typeof(TravelPackageService), ServiceLifetime.Scoped),
 				(typeof(DialogService), ServiceLifetime.Scoped), // Radzen service type, not my creation.
 				(typeof(AuthService), ServiceLifetime.Scoped),
-				(typeof(SessionState), ServiceLifetime.Singleton),
+				(typeof(SessionState), ServiceLifetime.Scoped),
 			};
 
 			private enum ServiceLifetime
@@ -49,6 +50,12 @@ namespace Capstone.Models
 
 			public static void RegisterServices(WebAssemblyHostBuilder builder)
 			{
+
+				builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(AppConfigHelper.ApiBaseUrl) });
+
+				builder.Services.AddRadzenComponents();
+				builder.Services.AddBlazoredLocalStorage();
+
 				Dictionary<ServiceLifetime, Func<Type, IServiceCollection>> registrationDelegateDict = new()
 				{
 					{ ServiceLifetime.Scoped, builder.Services.AddScoped },

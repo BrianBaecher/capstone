@@ -7,13 +7,20 @@
 @inject DialogService dialogService // login displayed as modal, dialogService handles modals...
 
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
-	<RadzenTemplateForm Data=@("LoginWithDefaultValues")>
-		<RadzenLogin AllowRegister="true" AllowResetPassword="true" Username=@username Password=@password
-					 AllowRememberMe="true" RememberMe="@rememberMe"
-					 Login=@(args => OnLogin(args))
-					 ResetPassword=@(args => OnResetPassword(args))
-					 Register=@(_ => OnRegister()) />
-	</RadzenTemplateForm>
+	@if (isRegister)
+	{
+		<RegistrationForm OnRegistrationSuccess="Close" />
+	}
+	else
+	{
+		<RadzenTemplateForm Data=@("LoginWithDefaultValues")>
+			<RadzenLogin AllowRegister="true" AllowResetPassword="true" Username=@username Password=@password
+						 AllowRememberMe="true" RememberMe="@rememberMe"
+						 Login=@(args => OnLogin(args))
+						 ResetPassword=@(args => OnResetPassword(args))
+						 Register=@(_ => OnRegister()) />
+		</RadzenTemplateForm>
+	}
 </RadzenCard>
 
 @code {
@@ -21,16 +28,19 @@
 	string password = string.Empty;
 	bool rememberMe;
 
+	bool isRegister;
+	bool isResetPassword;
+
 	private async Task OnLogin(LoginArgs loginArgs)
 	{
-		var user = await authService.LoginAsync(loginArgs.Username, loginArgs.Password);
-		if(user == null)
+		var loginResponse = await authService.LoginAsync(loginArgs.Username, loginArgs.Password);
+		if (loginResponse == null)
 		{
 			// failed login
 			return;
 		}
 		// set active user?
-		sessionState.SetUser(user);
+		await sessionState.SetUserAsync(loginResponse.User, loginResponse.Token);
 		Close();
 	}
 
@@ -41,7 +51,8 @@
 
 	private void OnRegister()
 	{
-
+		isRegister = true;
+		isResetPassword = false;
 	}
 
 	private void Close()

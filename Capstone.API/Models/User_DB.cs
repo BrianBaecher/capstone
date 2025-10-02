@@ -35,7 +35,6 @@ namespace Capstone.API.Models
 			{
 				Id = Id,
 				Username = Username,
-				Password = Password,
 				Email = Email,
 				Role = Role
 			};

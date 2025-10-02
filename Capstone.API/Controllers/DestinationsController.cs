@@ -1,5 +1,6 @@
 using Capstone.Api.Models;
 using Capstone.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -35,6 +36,7 @@ namespace Capstone.API.Controllers
 			return Ok(destination);
 		}
 
+		[Authorize]
 		[HttpPost]
 		public async Task<ActionResult<Destination_DB>> Create(Destination_DB destination)
 		{
@@ -42,6 +44,7 @@ namespace Capstone.API.Controllers
 			return CreatedAtRoute("GetDestination", new { id = destination.Id }, destination);
 		}
 
+		[Authorize]
 		[HttpPut("{id:length(24)}")]
 		public async Task<IActionResult> Update(string id, Destination_DB updatedDestination)
 		{
@@ -51,6 +54,7 @@ namespace Capstone.API.Controllers
 			return NoContent();
 		}
 
+		[Authorize]
 		[HttpDelete("{id:length(24)}")]
 		public async Task<IActionResult> Delete(string id)
 		{

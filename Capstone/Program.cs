@@ -2,7 +2,6 @@ using Capstone;
 using Capstone.Models;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -20,10 +19,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 	AppConfigHelper.OnStart(settings);
 }
-
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(AppConfigHelper.ApiBaseUrl) });
-
-builder.Services.AddRadzenComponents();
 
 // adding services via static helper
 AppConfigHelper.ServiceManager.RegisterServices(builder);
