@@ -73,6 +73,10 @@ builder.Services.AddAuthentication("Bearer")
 		};
 	});
 
+builder.Services.AddHttpClient();
+
+builder.Services.AddHostedService<NytTravelStoryService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -90,7 +94,7 @@ app.MapControllers();
 
 app.UseCors("AllowAll");
 
-// allow serving of static files (included for images)
+// allows serving of static files
 app.UseStaticFiles(new StaticFileOptions
 {
 	// API URL can't seem to communicate .avif files, trying this...

@@ -1,0 +1,31 @@
+﻿@page "/news"
+@using Capstone.Shared.Models
+@inject HttpClient http
+
+@if (storyResponse == null)
+{
+	<RadzenIcon Icon="cycle" class="spin" />
+}
+else
+{
+	foreach (var item in storyResponse.Results)
+	{
+		if (item.Section != "admin")
+		{
+			<Capstone.Components.TravelArticle TravelStory="item" />
+		}
+	}
+}
+
+@code {
+	TravelStoryResponse? storyResponse;
+
+	protected override async Task OnInitializedAsync()
+	{
+		storyResponse = await http.GetFromJsonAsync<TravelStoryResponse>("travelstories.json");
+
+		Console.WriteLine("derp");
+	}
+
+
+}

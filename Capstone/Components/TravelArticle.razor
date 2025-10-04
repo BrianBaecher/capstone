@@ -1,0 +1,41 @@
+﻿@using Capstone.Shared.Models
+
+<RadzenCard class="rz-background-color-secondary-light rz-shadow-0 rz-border-radius-0 rz-p-8" Style="max-width: 900px" Variant="Variant.Outlined">
+	<RadzenRow AlignItems="AlignItems.Center">
+		<RadzenColumn>
+			@if (TravelStory.Multimedia.Count > 0)
+			{
+				<RadzenImage Path="@TravelStory.Multimedia[0].Url" Style="max-width:400px;" />
+			}
+		</RadzenColumn>
+		<RadzenColumn>
+			<RadzenText TextStyle="TextStyle.DisplayH5">
+				@TravelStory.Title
+			</RadzenText>
+			<RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.End">
+				@TravelStory.Byline
+			</RadzenText>
+			<RadzenText TextStyle="TextStyle.Subtitle1">
+				Date Published: @DateParser(TravelStory.Published_Date)
+			</RadzenText>
+			<RadzenRow>
+				<RadzenText TextStyle="TextStyle.Body1">
+					@TravelStory.Abstract
+				</RadzenText>
+			</RadzenRow>
+		</RadzenColumn>
+	</RadzenRow>
+</RadzenCard>
+
+@code {
+	[Parameter]
+	public required TravelStory TravelStory { get; set; }
+
+
+	private string DateParser(string dateTimeString)
+	{
+		if (!DateTime.TryParse(dateTimeString, out var date)) return "?";
+
+		return date.ToShortDateString();
+	}
+}
