@@ -1,0 +1,27 @@
+﻿@using Capstone.Shared.Models
+
+<RadzenRow JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+
+	@if (loginResponse == null)
+	{
+		<RadzenIcon Icon="cycle" class="spin" />
+	}
+	else
+	{
+		<RadzenIcon Icon=@(loginResponse.Success ? "done_outline" : "dangerous")
+					IconColor=@(loginResponse.Success ? Colors.Success : Colors.Danger)
+					Style="font-size: 48px;"
+					class="filled-icon" />
+		<RadzenText TextStyle="TextStyle.DisplayH6" class="rz-m-0">
+			@(string.IsNullOrWhiteSpace(loginResponse.ResponseMessage) ?
+					"Something went wrong!" :
+					loginResponse.ResponseMessage)
+	</RadzenText>
+		}
+</RadzenRow>
+
+
+@code {
+	[Parameter]
+	public LoginResponse? loginResponse { get; set; }
+}

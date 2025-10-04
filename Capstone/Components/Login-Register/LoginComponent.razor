@@ -1,0 +1,80 @@
+﻿@using Capstone.Services
+@using Capstone.Shared.Models
+@inject AuthService authService
+@inject SessionState sessionState
+@inject DialogService dialogService // login displayed as modal, dialogService handles modals...
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+	@if (isRegister)
+	{
+		<RegistrationForm OnRegistrationSuccess="Close"
+						  OnBack="ToggleRegister" />
+	}
+	else if (isResetPassword)
+	{
+		<PasswordResetForm CloseEvent="Close"
+						   OnBack="ToggleResetPassword" />
+	}
+	else
+	{
+		<RadzenTemplateForm Data=@("LoginWithDefaultValues")>
+			<RadzenLogin AllowRegister="true"
+						 AllowResetPassword="true"
+						 Username=@username
+						 Password=@password
+						 AllowRememberMe="true"
+						 RememberMe="@rememberMe"
+						 Login=@(args => OnLogin(args))
+						 ResetPassword=@(_ => ToggleResetPassword())
+						 Register=@(_ => ToggleRegister()) />
+		</RadzenTemplateForm>
+		if (isRequestSent)
+		{
+			<LoginResponseDisplay loginResponse="loginResponse" />
+		}
+	}
+</RadzenCard>
+
+@code {
+	string username = string.Empty;
+	string password = string.Empty;
+	bool rememberMe;
+
+	bool isRegister;
+	bool isResetPassword;
+	bool isRequestSent;
+
+	LoginResponse? loginResponse;
+
+	private async Task OnLogin(LoginArgs loginArgs)
+	{
+		var loginResponse = await authService.LoginAsync(loginArgs.Username, loginArgs.Password);
+
+		if (loginResponse == null) return; // TODO: IDK WAT DO
+
+		if (loginResponse.Success)
+		{
+			// set active user
+			await sessionState.SetUserAsync(loginResponse.User, loginResponse.Token);
+		}
+
+		Close();
+	}
+
+	private void ToggleResetPassword()
+	{
+		isResetPassword = !isResetPassword;
+		isRegister = false;
+	}
+
+	private void ToggleRegister()
+	{
+		isRegister = !isRegister;
+		isResetPassword = false;
+	}
+
+	private void Close()
+	{
+		dialogService.Close();
+	}
+}

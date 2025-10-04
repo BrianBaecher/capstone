@@ -1,0 +1,45 @@
+﻿@using Capstone.Shared.Models
+@using Capstone.Services
+@inject SessionState sessionState
+
+<RadzenCard Style="max-width: 420px">
+	<RadzenRow JustifyContent="JustifyContent.Center"
+			   AlignItems="AlignItems.Center"
+			   Gap="1rem">
+		<RadzenProfileMenu>
+			<Template>
+				<RadzenIcon Icon="person" />
+			</Template>
+			<ChildContent>
+				@if (User?.Role == "admin")
+				{
+					<RadzenProfileMenuItem Text="Admin Dashboard" Icon="build" Path="admin" />
+				}
+				else
+				{
+					<RadzenProfileMenuItem Text="My Trips" Icon="travel" />
+					<RadzenProfileMenuItem Text="Feedback" Icon="feedback" />
+				}
+			</ChildContent>
+		</RadzenProfileMenu>
+		<RadzenStack Gap="0">
+			<RadzenText TextStyle="TextStyle.Overline" class="rz-my-0">Logged in as:</RadzenText>
+			<RadzenText TextStyle="TextStyle.Body1"><b>@(User?.Username)</b></RadzenText>
+		</RadzenStack>
+		<RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="logout" Text="Log Out" Click="OnLogoutClick" />
+	</RadzenRow>
+</RadzenCard>
+
+@code {
+	[Parameter]
+	public User? User { get; set; }
+
+	[Parameter]
+	public EventCallback OnLogout { get; set; }
+
+	private async Task OnLogoutClick()
+	{
+		sessionState.SetUser(null);
+		await OnLogout.InvokeAsync();
+	}
+}

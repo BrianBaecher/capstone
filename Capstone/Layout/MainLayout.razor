@@ -8,7 +8,7 @@
 	<main>
 		<RadzenComponents @rendermode="RenderMode.InteractiveWebAssembly" />
 		<RadzenStack Orientation="Radzen.Orientation.Vertical">
-			<RadzenRow JustifyContent="Radzen.JustifyContent.SpaceBetween">
+			<RadzenRow JustifyContent="Radzen.JustifyContent.SpaceBetween" class="rz-mx-9">
 				<RadzenImage Path="images/logo.png"
 							 AlternateText="Travlr Getaways logo"
 							 Style="max-width: 15rem;" />
@@ -23,7 +23,8 @@
 				}
 				else
 				{
-					<RadzenText>@sessionState.CurrentUser.Username</RadzenText>
+					<Capstone.Components.ProfileComponent User="sessionState.CurrentUser"
+														  OnLogout="OnLogout" />
 				}
 
 			</RadzenRow>
@@ -35,8 +36,6 @@
 					<Tabs>
 						<RadzenTabsItem Text="Home" />
 						<RadzenTabsItem Text="Travel" />
-						<RadzenTabsItem Text="Rooms" />
-						<RadzenTabsItem Text="Meals" />
 						<RadzenTabsItem Text="News" />
 						<RadzenTabsItem Text="About" />
 						<RadzenTabsItem Text="Contact" />
@@ -61,11 +60,9 @@
 	{
 		{0, "/"},
 		{1, "/travel"},
-		{2, "/admin"},
-		{3, "/meals"},
-		{4, "/news"},
-		{5, "/about"},
-		{6, "/contact"}
+		{2, "/news"},
+		{3, "/about"},
+		{4, "/contact"}
 	};
 
 	private void OnTabChange(int index)
@@ -82,11 +79,15 @@
 		}
 	}
 
+	private void OnLogout()
+	{
+		StateHasChanged();
+	}
+
 	private async Task ShowLoginModal()
 	{
-		Console.WriteLine("Showing modal?");
-		var modal = await dialogService.OpenAsync<Capstone.Components.LoginComponent>(
-			title: "Login"
+		var modal = await dialogService.OpenAsync<Capstone.Components.Login_Register.LoginComponent>(
+			title: ""
 		);
 	}
 }

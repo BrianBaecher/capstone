@@ -28,18 +28,33 @@ public class AuthController : ControllerBase
 
 		var userRecord = await _users.Find(u => u.Username == request.Username).FirstOrDefaultAsync();
 		if (userRecord == null)
-			return Unauthorized();
+			return Unauthorized(
+				new LoginResponse()
+				{
+					Success = false,
+					ResponseMessage = $"User '{request.Username} not found'"
+				}
+				);
 
 		// compare password
 		if (!IsPasswordValid(request.Password, userRecord.Password))
 		{
-			return Unauthorized();
+			return Unauthorized(
+				new LoginResponse()
+				{
+					Success = false,
+					ResponseMessage = $"Incorrect password"
+				}
+				);
 		}
 
-		LoginResponse loginResponse = new LoginResponse();
-
-		loginResponse.Token = GenerateJwtToken(userRecord);
-		loginResponse.User = userRecord.GetSharedModel();
+		LoginResponse loginResponse = new LoginResponse()
+		{
+			Token = GenerateJwtToken(userRecord),
+			User = userRecord.GetSharedModel(),
+			Success = true,
+			ResponseMessage = "Login successful"
+		};
 
 		return Ok(loginResponse);
 	}
@@ -66,13 +81,18 @@ public class AuthController : ControllerBase
 
 		if (existing != null)
 		{
-			return Conflict($"The username {registrationInfo.Username} is not available.");
+			var failRes = new LoginResponse()
+			{
+				Success = false,
+				ResponseMessage = $"The username '{registrationInfo.Username}' is not available."
+			};
+			return Conflict(failRes);
 		}
 
 		// create user in db (only non-admins can register thru site?)
 		var user = new User_DB()
 		{
-			Id = null, // mongo will assign one (in theory idk)
+			Id = null, // mongo will assign one
 			Username = registrationInfo.Username,
 			Password = HashPassword(registrationInfo.Password),
 			Email = registrationInfo.Email,
@@ -86,7 +106,9 @@ public class AuthController : ControllerBase
 			var response = new LoginResponse()
 			{
 				Token = GenerateJwtToken(user),
-				User = user.GetSharedModel()
+				User = user.GetSharedModel(),
+				Success = true,
+				ResponseMessage = "Registration Successful!"
 			};
 			return Ok(response);
 		}
@@ -98,12 +120,37 @@ public class AuthController : ControllerBase
 	}
 
 
+	[HttpPost("reset-password")]
+	public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordInfo info)
+	{
+		// not actually going to implement this, but just respond with the user's email address, where we'd hypothetically send the reset procedure link...
 
+		// using filter builder from mongo driver...
+		var filterBuilder = Builders<User_DB>.Filter;
+		var filter = filterBuilder.Empty;
 
+		if (info.UseEmail && !string.IsNullOrWhiteSpace(info.Email))
+		{
+			//'&=' in the context of MongoDB filter used to combine filter conditions.
+			filter &= filterBuilder.Eq(user => user.Email, info.Email);
+		}
+		else if (!string.IsNullOrWhiteSpace(info.Username))
+		{
+			filter &= filterBuilder.Eq(user => user.Username, info.Username);
+		}
+		else
+		{
+			return BadRequest();
+		}
 
+		var record = await _users.Find(filter).FirstOrDefaultAsync();
 
-
-
+		if (record != null)
+		{
+			return Ok($"Sent reset instructions to {info.Email}");
+		}
+		return BadRequest($"We could not find an account associated with the provided username or email");
+	}
 
 
 	private string GenerateJwtToken(User_DB user)

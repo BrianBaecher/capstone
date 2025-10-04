@@ -1,0 +1,75 @@
+﻿@using Capstone.Shared.Models
+@using Capstone.Services
+
+@inject AuthService authService
+@inject SessionState sessionState
+
+<RadzenStack JustifyContent="JustifyContent.Center"
+			 AlignItems="AlignItems.Center">
+	<RadzenText TextStyle="TextStyle.DisplayH3">
+		Register
+	</RadzenText>
+	<RadzenRow>
+		<RadzenButton Text="Back to Login"
+					  ButtonStyle="ButtonStyle.Secondary"
+					  Click="@((_)=>OnBack.InvokeAsync())" />
+	</RadzenRow>
+	<RadzenTemplateForm TItem="RegistrationInfo" Data="info" Submit="OnSubmit">
+		<RadzenFormField Text="Desired Username" Style="width: 100%;">
+			<RadzenTextBox Name="username" @bind-Value="@info.Username" />
+			<RadzenRequiredValidator Component="username" Text="Username is required." />
+		</RadzenFormField>
+		<RadzenFormField Text="Password" Style="width: 100%;">
+			<RadzenPassword Name="password" @bind-Value=@info.Password AutoCompleteType="AutoCompleteType.Off" />
+			<RadzenRequiredValidator Component="password" Text="Password is required." />
+		</RadzenFormField>
+		<RadzenFormField Text="Email Address" Style="width: 100%;">
+			<RadzenTextBox Name="email" @bind-Value="@info.Email" />
+			<RadzenRequiredValidator Component="email" Text="Email is required" />
+			<RadzenEmailValidator Component="email" Text="Provide a valid email address" Popup=@popup />
+		</RadzenFormField>
+		<RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Text="Register" />
+	</RadzenTemplateForm>
+	@if (loginResponse != null)
+	{
+		<RadzenRow JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+			<RadzenIcon Icon=@(loginResponse.Success ? "done_outline" : "dangerous")
+						IconColor=@(loginResponse.Success ? Colors.Success : Colors.Danger)
+						Style="font-size: 48px;"
+						class="filled-icon" />
+			<RadzenText TextStyle="TextStyle.DisplayH6" class="rz-m-0">
+				@(string.IsNullOrWhiteSpace(loginResponse.ResponseMessage) ?
+							"Something went wrong!" :
+							loginResponse.ResponseMessage)
+			</RadzenText>
+		</RadzenRow>
+	}
+</RadzenStack>
+
+@code {
+	[Parameter]
+	public EventCallback OnRegistrationSuccess { get; set; }
+
+	[Parameter]
+	public EventCallback OnBack { get; set; }
+
+	RegistrationInfo info = new();
+
+	LoginResponse? loginResponse;
+
+	bool popup;
+
+	private async Task OnSubmit()
+	{
+		Console.WriteLine("===========Registration submit========");
+		Console.WriteLine($"user: {info.Username}");
+
+		loginResponse = await authService.RegisterAsync(info);
+
+		if (loginResponse != null)
+		{
+			await sessionState.SetUserAsync(loginResponse.User, loginResponse.Token);
+			// await OnRegistrationSuccess.InvokeAsync();
+		}
+	}
+}
