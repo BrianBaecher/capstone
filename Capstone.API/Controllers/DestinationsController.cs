@@ -36,7 +36,7 @@ namespace Capstone.API.Controllers
 			return Ok(destination);
 		}
 
-		[Authorize]
+		[Authorize(Roles = "admin")]
 		[HttpPost]
 		public async Task<ActionResult<Destination_DB>> Create(Destination_DB destination)
 		{
@@ -44,7 +44,7 @@ namespace Capstone.API.Controllers
 			return CreatedAtRoute("GetDestination", new { id = destination.Id }, destination);
 		}
 
-		[Authorize]
+		[Authorize(Roles = "admin")]
 		[HttpPut("{id:length(24)}")]
 		public async Task<IActionResult> Update(string id, Destination_DB updatedDestination)
 		{
@@ -54,7 +54,7 @@ namespace Capstone.API.Controllers
 			return NoContent();
 		}
 
-		[Authorize]
+		[Authorize(Roles = "admin")]
 		[HttpDelete("{id:length(24)}")]
 		public async Task<IActionResult> Delete(string id)
 		{

@@ -5,7 +5,12 @@
 		<RadzenColumn>
 			@if (TravelStory.Multimedia.Count > 0)
 			{
-				<RadzenImage Path="@TravelStory.Multimedia[0].Url" Style="max-width:400px;" />
+				<RadzenImage Path="@TravelStory.Multimedia[0].Url"
+							 Style="width: 300px;
+									height: 200px;
+									object-fit: cover;
+									border-radius: 8px;
+									display: block;" />
 			}
 		</RadzenColumn>
 		<RadzenColumn>
@@ -23,6 +28,11 @@
 					@TravelStory.Abstract
 				</RadzenText>
 			</RadzenRow>
+			<RadzenRow>
+				<a href="@TravelStory.Url" target="_blank" rel="noreferrer">
+					<RadzenButton Text="Read" ButtonStyle="ButtonStyle.Primary" />
+				</a>
+			</RadzenRow>
 		</RadzenColumn>
 	</RadzenRow>
 </RadzenCard>
@@ -31,10 +41,9 @@
 	[Parameter]
 	public required TravelStory TravelStory { get; set; }
 
-
 	private string DateParser(string dateTimeString)
 	{
-		if (!DateTime.TryParse(dateTimeString, out var date)) return "?";
+		if (!DateTime.TryParse(dateTimeString, out var date)) return "No date recorded";
 
 		return date.ToShortDateString();
 	}

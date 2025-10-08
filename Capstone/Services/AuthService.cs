@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Capstone.Shared.Models;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -6,11 +7,14 @@ namespace Capstone.Services;
 public class AuthService
 {
 	private readonly HttpClient _httpClient;
+	private readonly ILocalStorageService _localStorage;
+
 	const string URI = "api/auth";
 
-	public AuthService(HttpClient httpClient)
+	public AuthService(HttpClient httpClient, ILocalStorageService localStorage)
 	{
 		_httpClient = httpClient;
+		_localStorage = localStorage;
 	}
 
 	public async Task<LoginResponse?> LoginAsync(string username, string password)
@@ -39,5 +43,17 @@ public class AuthService
 		var res = await _httpClient.PostAsJsonAsync($"{URI}/reset-password", info);
 
 		return await res.Content.ReadAsStringAsync();
+	}
+
+	public async Task<List<User>> GetUsersAsync()
+	{
+		var token = await _localStorage.GetItemAsync<string>("authToken");
+		if (!string.IsNullOrEmpty(token))
+		{
+			_httpClient.DefaultRequestHeaders.Authorization =
+				new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+		}
+
+		return await _httpClient.GetFromJsonAsync<List<User>>($"{URI}/users") ?? new();
 	}
 }

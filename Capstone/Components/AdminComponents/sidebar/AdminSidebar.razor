@@ -1,0 +1,44 @@
+﻿@namespace Capstone.Components.AdminComponents
+@using Capstone.Models
+
+<RadzenPanelMenu Style="width:300px" Multiple="true" class="rz-background-color-base-600">
+	<RadzenPanelMenuItem Text="Manage Users" Icon="group">
+		<RadzenPanelMenuItem Icon="search"
+							 Value="@AppConfigHelper.AdminSidebarSelections.USER_SEARCH"
+							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AppConfigHelper.AdminSidebarSelections.USER_SEARCH))">
+			<Template>
+				<PanelMenuItemTemplate Label="Search" NumOfNotifications="null" />
+			</Template>
+		</RadzenPanelMenuItem>
+		<RadzenPanelMenuItem Icon="person_add" Value="@AppConfigHelper.AdminSidebarSelections.USER_ADD">
+			<Template>
+				<PanelMenuItemTemplate Label="Add User" NumOfNotifications="null" />
+			</Template>
+		</RadzenPanelMenuItem>
+	</RadzenPanelMenuItem>
+	<RadzenPanelMenuItem Text="Manage Destinations" Icon="landscape">
+		<RadzenPanelMenuItem Icon="add"
+							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AppConfigHelper.AdminSidebarSelections.DESTINATION_ADD))">
+			<Template>
+				<PanelMenuItemTemplate Label="Add Destination" NumOfNotifications="null" />
+			</Template>
+		</RadzenPanelMenuItem>
+		<RadzenPanelMenuItem Icon="edit"
+							 Click="@((_)=>{OnMenuItemSelection.InvokeAsync(AppConfigHelper.AdminSidebarSelections.DESTINATION_EDIT);})">
+			<Template>
+				<PanelMenuItemTemplate Label="Edit Destinations" NumOfNotifications="null" />
+			</Template>
+		</RadzenPanelMenuItem>
+	</RadzenPanelMenuItem>
+	<RadzenPanelMenuItem Text="Manage Feedback" Icon="feedback">
+
+	</RadzenPanelMenuItem>
+</RadzenPanelMenu>
+
+@code {
+	[Parameter]
+	public EventCallback<AppConfigHelper.AdminSidebarSelections> OnMenuItemSelection { get; set; }
+
+
+	const int num = 5;
+}

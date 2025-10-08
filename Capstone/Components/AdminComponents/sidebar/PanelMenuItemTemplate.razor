@@ -1,0 +1,33 @@
+﻿@namespace Capstone.Components.AdminComponents
+
+<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+	<RadzenText class="rz-my-0" Style="color:antiquewhite;">@Label</RadzenText>
+	@if (NumOfNotifications != null && NumOfNotifications > 0)
+	{
+		<span class="menu-badge">
+			@NumOfNotifications
+		</span>
+	}
+</RadzenRow>
+<style>
+	.menu-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #e53935;
+		color: white;
+		border-radius: 50%;
+		width: 22px;
+		height: 22px;
+		font-size: 0.9em;
+		font-weight: bold;
+		margin-left: 8px;
+	}
+</style>
+@code {
+	[Parameter]
+	public int? NumOfNotifications { get; set; }
+
+	[Parameter]
+	public required string Label { get; set; }
+}

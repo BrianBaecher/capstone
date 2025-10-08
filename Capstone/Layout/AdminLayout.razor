@@ -1,0 +1,68 @@
+﻿@inherits LayoutComponentBase
+@using Capstone.Models
+@using Capstone.Services
+@inject NavigationManager navigationManager
+@inject SessionState sessionState
+
+
+<div class="layout-container" style="display: flex; min-height: 100vh;">
+	<div class="sidebar rz-background-color-base-600" style="width: 300px;">
+		<Capstone.Components.AdminComponents.AdminSidebar OnMenuItemSelection="Router" />
+	</div>
+	<div class="main" style="flex: 1;">
+		<RadzenComponents @rendermode="RenderMode.InteractiveWebAssembly" />
+		<RadzenStack Orientation="Radzen.Orientation.Vertical">
+			<RadzenRow JustifyContent="Radzen.JustifyContent.SpaceBetween" class="rz-mx-9">
+				<RadzenImage Path="images/logo.png"
+							 AlternateText="Travlr Getaways logo"
+							 Style="max-width: 15rem;" />
+
+				@if (sessionState.CurrentUser == null || sessionState.CurrentUser.Role != "admin")
+				{
+				}
+				else
+				{
+					<Capstone.Components.ProfileComponent User="sessionState.CurrentUser"
+														  OnLogout="OnLogout" />
+				}
+			</RadzenRow>
+		</RadzenStack>
+		@Body
+	</div>
+</div>
+
+@code {
+	private void OnMenuItemClick(MenuItemEventArgs args)
+	{
+		if (args.Value == null) return;
+
+		// menu item's "Value" prop is passed as string
+		if (args.Value is string str)
+		{
+			if (!Enum.TryParse<AppConfigHelper.AdminSidebarSelections>(str, out var selection)) return;
+
+			navigationManager.NavigateTo(AppConfigHelper.SidebarRouteDict[selection]);
+		}
+	}
+
+	private void Router(AppConfigHelper.AdminSidebarSelections selection)
+	{
+		if (!AppConfigHelper.SidebarRouteDict.TryGetValue(selection, out var route)) return;
+
+		navigationManager.NavigateTo(route);
+	}
+
+	private void OnLogout()
+	{
+		// navigate back to home
+		navigationManager.NavigateTo("/");
+	}
+
+	protected override void OnInitialized()
+	{
+		if (sessionState.CurrentUser == null || sessionState.CurrentUser.Role != "admin")
+		{
+			OnLogout();
+		}
+	}
+}

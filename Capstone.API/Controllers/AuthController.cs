@@ -1,5 +1,6 @@
 using Capstone.API.Models;
 using Capstone.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -59,20 +60,6 @@ public class AuthController : ControllerBase
 		return Ok(loginResponse);
 	}
 
-	[HttpGet]
-	public async Task<List<User>> GetUsers()
-	{
-		var records = await _users.Find(_ => true).ToListAsync();
-
-		List<User> users = new List<User>();
-		foreach (var record in records)
-		{
-			users.Add(record.GetSharedModel());
-		}
-		return users;
-	}
-
-
 	[HttpPost("register")]
 	public async Task<IActionResult> Register([FromBody] RegistrationInfo registrationInfo)
 	{
@@ -119,7 +106,6 @@ public class AuthController : ControllerBase
 		}
 	}
 
-
 	[HttpPost("reset-password")]
 	public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordInfo info)
 	{
@@ -151,7 +137,6 @@ public class AuthController : ControllerBase
 		}
 		return BadRequest($"We could not find an account associated with the provided username or email");
 	}
-
 
 	private string GenerateJwtToken(User_DB user)
 	{
@@ -206,4 +191,26 @@ public class AuthController : ControllerBase
 		return CryptographicOperations.FixedTimeEquals(hash, enteredHashed);
 	}
 
+	[Authorize(Roles = "admin")]
+	[HttpGet("users")]
+	public async Task<IActionResult> GetUsers()
+	{
+		var user_DBs = await _users.Find(_ => true).ToListAsync();
+		var users = user_DBs.Select(u => u.GetSharedModel()).ToList();
+
+		return Ok(users);
+	}
+
+	[Authorize(Roles = "admin")]
+	[HttpDelete("users")]
+	public async Task<IActionResult> DeleteUser([FromQuery] string id)
+	{
+		var user = await _users.FindAsync(x => x.Id == id);
+
+		if (user == null) return NotFound("No such user");
+
+		var del = _users.DeleteOne(x => x.Id == id);
+
+		return NoContent();
+	}
 }

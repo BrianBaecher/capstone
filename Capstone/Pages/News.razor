@@ -1,6 +1,7 @@
 ﻿@page "/news"
 @using Capstone.Shared.Models
 @inject HttpClient http
+@inject NavigationManager navManager
 
 @if (storyResponse == null)
 {
@@ -12,7 +13,8 @@ else
 	{
 		if (item.Section != "admin")
 		{
-			<Capstone.Components.TravelArticle TravelStory="item" />
+			<Capstone.Components.TravelArticle TravelStory="item"
+											    />
 		}
 	}
 }
@@ -27,5 +29,10 @@ else
 		Console.WriteLine("derp");
 	}
 
+	private void OnArticleNavigate(string url)
+	{
+		// used as callback for each travelarticle component. opens provided url in new browser tab.
+		navManager.NavigateTo(url, true);
+	}
 
 }

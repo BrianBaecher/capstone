@@ -1,0 +1,19 @@
+﻿@using Capstone.Shared.Models
+@using Capstone.Services
+@inject AuthService authService
+
+<h3>User Search</h3>
+<RadzenDataList Data="users" TItem="User">
+	<Template Context="user">
+		@user.Username
+	</Template>
+</RadzenDataList>
+
+@code {
+	List<User>? users;
+
+	protected override async Task OnInitializedAsync()
+	{
+		users = await authService.GetUsersAsync();
+	}
+}

@@ -1,0 +1,20 @@
+﻿@page "/admin/add-destinations"
+@layout AdminLayout
+@using Capstone.Shared.Models;
+
+
+<RadzenStack>
+	<Capstone.Components.AdminComponents.DestinationForm IsUpdateForm=false
+														 SelectedDestination="null"
+														 OnCancelForm="OnCancelForm" />
+</RadzenStack>
+
+@code {
+	Destination _destination = new();
+
+	private void OnCancelForm()
+	{
+		// reset to blank
+		_destination = new();
+	}
+}
