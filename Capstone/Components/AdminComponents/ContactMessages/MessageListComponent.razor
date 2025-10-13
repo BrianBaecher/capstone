@@ -1,0 +1,51 @@
+﻿@namespace Capstone.Components.AdminComponents
+@using Capstone.Shared.Models
+
+<RadzenText TextStyle="TextStyle.DisplayH6">
+	@(Topic.ToString() + " Messages")
+</RadzenText>
+<RadzenDataList TItem="ContactMessage"
+				Data="Messages"
+				PageSize="10"
+				AllowPaging=true>
+	<Template Context="msg">
+		<RadzenCard Variant="Variant.Outlined">
+			<RadzenStack>
+				<RadzenText>From: @GetMessageEmail(msg)</RadzenText>
+				<RadzenText>Subject: @msg.Header</RadzenText>
+				<RadzenRow>
+					<RadzenColumn Size="2">
+						<RadzenText>
+							Message: 
+						</RadzenText>
+						</RadzenColumn>
+					<RadzenColumn>
+						<RadzenText TextStyle="TextStyle.Body1">
+							@msg.Content
+						</RadzenText>
+					</RadzenColumn>
+				</RadzenRow>
+			</RadzenStack>
+		</RadzenCard>
+	</Template>
+</RadzenDataList>
+
+@code {
+	[Parameter]
+	public required List<ContactMessage> Messages { get; set; }
+
+	[Parameter]
+	public required ContactMessage.MessageTopic Topic { get; set; }
+
+	private string GetMessageEmail(ContactMessage msg)
+	{
+		// if user, get user email
+		if (msg.User != null)
+		{
+			return msg.User.Email;
+		}
+
+		// else email should be popped
+		return msg.Email ?? "UH OH";
+	}
+}

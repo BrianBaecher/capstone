@@ -39,6 +39,7 @@ namespace Capstone.Models
 				(typeof(DialogService), ServiceLifetime.Scoped), // Radzen service type, not my creation.
 				(typeof(AuthService), ServiceLifetime.Scoped),
 				(typeof(SessionState), ServiceLifetime.Scoped),
+				(typeof(ContactService), ServiceLifetime.Scoped)
 			};
 
 			private enum ServiceLifetime
@@ -73,20 +74,6 @@ namespace Capstone.Models
 			}
 		}
 
-		public enum AdminSidebarSelections
-		{
-			USER_SEARCH,
-			USER_ADD,
-			DESTINATION_EDIT,
-			DESTINATION_ADD
-		}
 
-		public static Dictionary<AdminSidebarSelections, string> SidebarRouteDict = new()
-		{
-			{AdminSidebarSelections.USER_SEARCH, "/admin/user-search" },
-			{AdminSidebarSelections.USER_ADD, "/admin/add-user"},
-			{AdminSidebarSelections.DESTINATION_EDIT, "/admin/edit-destinations" },
-			{AdminSidebarSelections.DESTINATION_ADD, "/admin/add-destinations" },
-		};
 	}
 }

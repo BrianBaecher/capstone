@@ -1,0 +1,53 @@
+﻿@using Capstone.Services
+@using Capstone.Shared.Models
+@namespace Capstone.Components.AdminComponents
+@inject ContactService contactService
+
+@if (!isDataFetched)
+{
+	<RadzenText>LOADING</RadzenText>
+}
+else
+{
+	foreach (var kvp in messageDict)
+	{
+		<MessageListComponent Messages="kvp.Value" Topic="kvp.Key" />
+	}
+}
+
+@code {
+	Dictionary<ContactMessage.MessageTopic, List<ContactMessage>> messageDict = new();
+
+	bool isDataFetched;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		// should be empty dict already but...
+		if (messageDict.Keys.Count > 0) messageDict.Clear();
+
+		foreach (var enumVal in Enum.GetValues<ContactMessage.MessageTopic>())
+		{
+			messageDict.Add(enumVal, new());
+		}
+
+		// get all the messages
+		var messages = await contactService.GetMessagesAsync();
+
+		if (messages == null)
+		{
+			throw new Exception("We got problems");
+		}
+
+		// separate by topic
+		// feed separate lists into list display components...
+		foreach (var msg in messages)
+		{
+			messageDict[msg.Topic].Add(msg);
+		}
+
+		isDataFetched = true;
+	}
+
+}

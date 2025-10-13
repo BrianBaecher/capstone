@@ -201,6 +201,13 @@ public class AuthController : ControllerBase
 		return Ok(users);
 	}
 
+	//[Authorize(Roles = "admin")]
+	//[HttpPost("users")]
+	//public async Task<IActionResult> CreateUser([FromBody] User user)
+	//{
+	//	var res = await _users.InsertOneAsync(user);
+	//}
+
 	[Authorize(Roles = "admin")]
 	[HttpDelete("users")]
 	public async Task<IActionResult> DeleteUser([FromQuery] string id)
@@ -212,5 +219,28 @@ public class AuthController : ControllerBase
 		var del = _users.DeleteOne(x => x.Id == id);
 
 		return NoContent();
+	}
+
+	[Authorize(Roles = "admin")]
+	[HttpPatch("users")]
+	public async Task<IActionResult> PatchUser([FromBody] User updatedUser)
+	{
+		var filter = Builders<User_DB>.Filter.Eq(u => u.Id, updatedUser.Id);
+		var update = Builders<User_DB>.Update
+			.Set(u => u.Username, updatedUser.Username)
+			.Set(u => u.Email, updatedUser.Email)
+			.Set(u => u.Role, updatedUser.Role);
+
+		var options = new FindOneAndUpdateOptions<User_DB>
+		{
+			ReturnDocument = ReturnDocument.After
+		};
+
+		var updatedDbUser = await _users.FindOneAndUpdateAsync(filter, update, options);
+
+		if (updatedDbUser == null)
+			return NotFound("User not found");
+
+		return Accepted(updatedDbUser.GetSharedModel());
 	}
 }

@@ -1,0 +1,69 @@
+﻿@page "/admin"
+@using Capstone.Models
+@using Capstone.Components.AdminComponents
+@using Capstone.Services
+@layout AdminLayout
+@inject NavigationManager navigationManager
+@inject SessionState sessionState
+
+
+<div class="layout-container" style="display: flex; min-height: 100vh;">
+	<div class="sidebar rz-background-color-base-600" style="width: 300px;">
+		<Capstone.Components.AdminComponents.AdminSidebar OnMenuItemSelection="RenderContent" />
+	</div>
+	<div class="main" style="flex: 1;">
+		@*content*@
+		@if (frag == null)
+		{
+			<p>Click user search</p>
+		}
+		else
+		{
+			@frag
+		}
+	</div>
+</div>
+
+@code {
+
+	AdminSidebarSelections activeSelection = AdminSidebarSelections.None;
+
+	RenderFragment? frag;
+
+	private void RenderContent(AdminSidebarSelections selection)
+	{
+		switch (selection)
+		{
+			case AdminSidebarSelections.UserSearch:
+				frag = @<UserSearchComponent />;
+				break;
+			case AdminSidebarSelections.UserAdd:
+				break;
+			case AdminSidebarSelections.DestinationAdd:
+				frag =@<AddDestinationComponent />;
+				break;
+			case AdminSidebarSelections.DestinationEdit:
+				frag =@<EditDestinationComponent />;
+				break;
+			case AdminSidebarSelections.Messages:
+				frag =@<ContactMessageDisplayComponent />;
+				break;
+			default:
+				break;
+		}
+	}
+
+	private void OnLogout()
+	{
+		// navigate back to home
+		navigationManager.NavigateTo("/");
+	}
+
+	protected override void OnInitialized()
+	{
+		if (sessionState.CurrentUser == null || sessionState.CurrentUser.Role != "admin")
+		{
+			OnLogout();
+		}
+	}
+}

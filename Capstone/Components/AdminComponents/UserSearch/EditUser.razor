@@ -1,0 +1,47 @@
+﻿@using Capstone.Shared.Models
+@using Capstone.Services
+@inject AuthService authService
+@namespace Capstone.Components.AdminComponents
+
+<RadzenTemplateForm TItem="User" Submit="OnSubmit">
+	<RadzenFormField Text="Username">
+		<RadzenTextBox @bind-Value=formModel.Username />
+	</RadzenFormField>
+	<RadzenFormField Text="Email Address">
+		<RadzenTextBox @bind-Value=formModel.Email />
+	</RadzenFormField>
+	<RadzenFormField Text="Role">
+		<RadzenDropDown TValue="string" Data="roleData" AllowSelectAll=false @bind-Value=formModel.Role />
+	</RadzenFormField>
+	<RadzenButton ButtonType="ButtonType.Submit" Text="Submit" />
+</RadzenTemplateForm>
+
+@code {
+	[Parameter]
+	public required User User { get; set; }
+
+	bool isUpdate;
+
+	List<string> roleData = new() { "admin", "user" };
+
+	User formModel = new();
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+
+		isUpdate = User.Id != null; // mongo assigned ID means user exists in DB
+
+		formModel = isUpdate ? User.Clone() : User;
+	}
+
+	async Task OnSubmit(User user)
+	{
+		// if editing
+		// var result = await authService.UpdateUserAsync(user);
+		// if new user...
+
+		var result = await authService.UpdateUserAsync(user);
+
+	}
+}

@@ -1,9 +1,9 @@
 ﻿@using Capstone.Shared.Models
 @using Capstone.Services
 @inject AuthService authService
+@namespace Capstone.Components.AdminComponents
 
-<h3>User Search</h3>
-<RadzenDataList Data="users" TItem="User">
+<RadzenDataList Data="@(FilteredUsers == null ? users : FilteredUsers)" TItem="User">
 	<Template Context="user">
 		@user.Username
 	</Template>
@@ -11,6 +11,9 @@
 
 @code {
 	List<User>? users;
+
+	[Parameter]
+	public List<User>? FilteredUsers { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{

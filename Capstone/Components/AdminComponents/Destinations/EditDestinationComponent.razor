@@ -1,43 +1,25 @@
-@page "/admin"
-@layout AdminLayout
+﻿@layout AdminLayout
 @using Radzen.Blazor
 @using Capstone.Shared.Models;
-
+@namespace Capstone.Components.AdminComponents
 
 <RadzenStack>
 	<Capstone.Components.AdminComponents.DestinationSelector OnSelection="OnUpdateSelection" />
 
-	<RadzenRow>
-		<RadzenButton ButtonStyle="Radzen.ButtonStyle.Base"
-					  Text="Create Destination"
-					  Icon="add"
-					  Click="@((args) => OnCreateButtonPress(args))" />
-
-	</RadzenRow>
-
 	@if (_destination != null)
 	{
-		<Capstone.Components.AdminComponents.DestinationForm IsUpdateForm=isUpdate
-															 SelectedDestination="isUpdate ? _destination : null"
+		<Capstone.Components.AdminComponents.DestinationForm IsUpdateForm=true
+															 SelectedDestination="_destination"
 															 OnCancelForm="OnCancelForm" />
 	}
 </RadzenStack>
 
 @code {
-	bool isUpdate;
-
 	Destination? _destination;
 
 	private void OnUpdateSelection(Destination d)
 	{
-		isUpdate = true;
 		_destination = d;
-	}
-
-	private void OnCreateButtonPress(MouseEventArgs _)
-	{
-		isUpdate = false;
-		_destination = new();
 	}
 
 	private void OnCancelForm()

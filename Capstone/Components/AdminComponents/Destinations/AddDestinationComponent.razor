@@ -1,0 +1,19 @@
+﻿@layout AdminLayout
+@using Capstone.Shared.Models;
+@namespace Capstone.Components.AdminComponents
+
+<RadzenStack>
+	<DestinationForm IsUpdateForm=false
+					 SelectedDestination="null"
+					 OnCancelForm="OnCancelForm" />
+</RadzenStack>
+
+@code {
+	Destination _destination = new();
+
+	private void OnCancelForm()
+	{
+		// reset to blank
+		_destination = new();
+	}
+}

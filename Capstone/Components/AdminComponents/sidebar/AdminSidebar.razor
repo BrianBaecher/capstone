@@ -1,44 +1,73 @@
 ﻿@namespace Capstone.Components.AdminComponents
 @using Capstone.Models
+@using Capstone.Shared.Models
+@using Capstone.Services
+@inject ContactService contactService
 
 <RadzenPanelMenu Style="width:300px" Multiple="true" class="rz-background-color-base-600">
 	<RadzenPanelMenuItem Text="Manage Users" Icon="group">
 		<RadzenPanelMenuItem Icon="search"
-							 Value="@AppConfigHelper.AdminSidebarSelections.USER_SEARCH"
-							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AppConfigHelper.AdminSidebarSelections.USER_SEARCH))">
+							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.UserSearch))">
 			<Template>
 				<PanelMenuItemTemplate Label="Search" NumOfNotifications="null" />
 			</Template>
 		</RadzenPanelMenuItem>
-		<RadzenPanelMenuItem Icon="person_add" Value="@AppConfigHelper.AdminSidebarSelections.USER_ADD">
+		<RadzenPanelMenuItem Icon="person_add" Value="@AdminSidebarSelections.UserAdd">
 			<Template>
-				<PanelMenuItemTemplate Label="Add User" NumOfNotifications="null" />
+				<PanelMenuItemTemplate Label="Add User" />
 			</Template>
 		</RadzenPanelMenuItem>
 	</RadzenPanelMenuItem>
 	<RadzenPanelMenuItem Text="Manage Destinations" Icon="landscape">
 		<RadzenPanelMenuItem Icon="add"
-							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AppConfigHelper.AdminSidebarSelections.DESTINATION_ADD))">
+							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.DestinationAdd))">
 			<Template>
 				<PanelMenuItemTemplate Label="Add Destination" NumOfNotifications="null" />
 			</Template>
 		</RadzenPanelMenuItem>
 		<RadzenPanelMenuItem Icon="edit"
-							 Click="@((_)=>{OnMenuItemSelection.InvokeAsync(AppConfigHelper.AdminSidebarSelections.DESTINATION_EDIT);})">
+							 Click="@((_)=>{OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.DestinationEdit);})">
 			<Template>
-				<PanelMenuItemTemplate Label="Edit Destinations" NumOfNotifications="null" />
+				<PanelMenuItemTemplate Label="Edit Destinations" />
 			</Template>
 		</RadzenPanelMenuItem>
 	</RadzenPanelMenuItem>
-	<RadzenPanelMenuItem Text="Manage Feedback" Icon="feedback">
-
+	<RadzenPanelMenuItem Text="Manage Feedback" Icon="feedback" Click="@((_) => { OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.Messages); })">
+		<RadzenPanelMenuItem Icon="edit"
+							 Click="@((_)=>{OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.DestinationEdit);})">
+			<Template>
+				<PanelMenuItemTemplate Label="Support" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Support] />
+			</Template>
+		</RadzenPanelMenuItem>
 	</RadzenPanelMenuItem>
 </RadzenPanelMenu>
 
 @code {
 	[Parameter]
-	public EventCallback<AppConfigHelper.AdminSidebarSelections> OnMenuItemSelection { get; set; }
+	public EventCallback<AdminSidebarSelections> OnMenuItemSelection { get; set; }
 
+	Dictionary<ContactMessage.MessageTopic, int> unreadMessageDict = new()
+	{
+		{ContactMessage.MessageTopic.Support, 0},
+		{ContactMessage.MessageTopic.Feedback, 0},
+		{ContactMessage.MessageTopic.Sales, 0},
+		{ContactMessage.MessageTopic.Other, 0},
+	};
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		foreach(var topic in unreadMessageDict.Keys)
+		{
+			unreadMessageDict[topic] = await GetNumNotifications(topic) ?? 0;
+		}
+	}
+
+	private async Task<int?> GetNumNotifications(ContactMessage.MessageTopic topic)
+	{
+		return await contactService.GetUnreadCountAsync(topic.ToString());
+	}
 
 	const int num = 5;
 }

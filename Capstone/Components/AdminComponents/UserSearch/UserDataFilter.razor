@@ -1,0 +1,120 @@
+﻿@using Capstone.Shared.Models
+@using Capstone.Services
+@namespace Capstone.Components.AdminComponents
+@inject AuthService authService
+@inject DialogService dialogService
+
+<RadzenRow>
+	<RadzenText>Case Insensitive Search </RadzenText>
+	<RadzenCheckBox TValue="bool"
+					Change="@((bool isChecked) => filterCaseSensitivity = isChecked ? FilterCaseSensitivity.CaseInsensitive : FilterCaseSensitivity.Default)" />
+</RadzenRow>
+<RadzenDataGrid TItem="User"
+				@ref=grid
+				AllowFiltering=true
+				AllowColumnResize=true
+				FilterMode="FilterMode.Simple"
+				PageSize="5"
+				AllowPaging=true
+				AllowSorting=true
+				Data="users"
+				FilterCaseSensitivity="filterCaseSensitivity">
+	<Columns>
+		<RadzenDataGridColumn Title="User ID"
+							  Property="@nameof(User.Id)"
+							  Sortable=false
+							  Filterable=true>
+
+		</RadzenDataGridColumn>
+		<RadzenDataGridColumn Title="Username"
+							  Property="@nameof(User.Username)"
+							  Sortable=true
+							  Filterable=true>
+
+		</RadzenDataGridColumn>
+		<RadzenDataGridColumn Title="Role"
+							  Property="@nameof(User.Role)"
+							  Sortable=true
+							  Filterable=true
+							  FilterValue=roleFilterVal>
+			<FilterTemplate>
+				<RadzenCheckBox TValue="bool" Change="OnRoleFilterToggle" />
+				<RadzenDropDown TValue="string"
+								Data=roleOptions
+								@bind-Value=roleFilterVal
+								Change="OnRoleFilterValSelection"
+								Placeholder="Select Role"
+								Disabled=!useRoleFilter>
+
+				</RadzenDropDown>
+			</FilterTemplate>
+
+		</RadzenDataGridColumn>
+		<RadzenDataGridColumn Title="Email Address"
+							  Property="@nameof(User.Email)"
+							  Sortable=true
+							  Filterable=true>
+		</RadzenDataGridColumn>
+		<RadzenDataGridColumn Title="Actions" Sortable=false Filterable=false>
+			<Template Context="user">
+				<RadzenButton Text="Edit" Icon="person_edit" Click="@(() => EditUser(user))" Style="margin-right: 5px;" />
+				<RadzenButton Text="Delete" Icon="person_remove" Click="@(() => DeleteUser(user))" ButtonStyle="ButtonStyle.Danger" />
+			</Template>
+		</RadzenDataGridColumn>
+	</Columns>
+</RadzenDataGrid>
+
+@code {
+
+	[Parameter]
+	public EventCallback<User> OnUserEditSelected { get; set; }
+
+	RadzenDataGrid<User>? grid;
+
+	List<User>? users;
+
+	FilterCaseSensitivity filterCaseSensitivity = FilterCaseSensitivity.Default;
+
+	RadzenDataGridColumn<string>? roleColumn;
+	bool useRoleFilter;
+	string? roleFilterVal;
+	List<string> roleOptions = new() { "admin", "user" };
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		users = await authService.GetUsersAsync();
+	}
+
+	private void OnRoleFilterToggle(bool isChecked)
+	{
+		useRoleFilter = isChecked;
+
+		if (!useRoleFilter)
+		{
+			roleFilterVal = null;
+		}
+	}
+
+	private void OnRoleFilterValSelection(object selection)
+	{
+		if (selection is not string s) return;
+		roleFilterVal = s;
+	}
+
+	private async Task EditUser(User user)
+	{
+		await OnUserEditSelected.InvokeAsync(user);
+	}
+
+	private async Task DeleteUser(User user)
+	{
+		//TODO: confirmation dialog
+
+		var success = await authService.DeleteUserAsync(user.Id);
+
+		if (success) { users?.Remove(user); grid?.Reload(); }
+	}
+}

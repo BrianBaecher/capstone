@@ -56,4 +56,22 @@ public class AuthService
 
 		return await _httpClient.GetFromJsonAsync<List<User>>($"{URI}/users") ?? new();
 	}
+
+	public async Task<bool> DeleteUserAsync(string userID)
+	{
+		var response = await _httpClient.DeleteAsync($"{URI}/users?id={userID}");
+
+		return response.IsSuccessStatusCode;
+	}
+
+	public async Task<User?> UpdateUserAsync(User editedUser)
+	{
+		var response = await _httpClient.PatchAsJsonAsync<User>($"{URI}/users", editedUser);
+
+		if (response.IsSuccessStatusCode)
+		{
+			return await response.Content.ReadFromJsonAsync<User>();
+		}
+		return null;
+	}
 }
