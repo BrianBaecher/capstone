@@ -89,11 +89,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("AllowAll");
 
 // allows serving of static files
 app.UseStaticFiles(new StaticFileOptions

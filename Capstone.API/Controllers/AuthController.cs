@@ -150,6 +150,7 @@ public class AuthController : ControllerBase
 
 		var claims = new[]
 		{
+			// NOTE/HEADACHE: The JWT "sub" claim is mapped to ClaimTypes.NameIdentifier for compatibility with .NET identity APIs.
 		new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? ""),
 		new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
 		new Claim(ClaimTypes.Role, user.Role)
@@ -163,6 +164,40 @@ public class AuthController : ControllerBase
 			signingCredentials: creds);
 
 		return new JwtSecurityTokenHandler().WriteToken(token);
+	}
+
+	private ClaimsPrincipal? ValidateJwtToken(string jwtStr)
+	{
+		var jwtSettings = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.json")
+			.Build()
+			.GetSection("Jwt");
+
+		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+		var tokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidIssuer = jwtSettings["Issuer"],
+			ValidateAudience = true,
+			ValidAudience = jwtSettings["Audience"],
+			ValidateLifetime = true,
+			IssuerSigningKey = key,
+			ValidateIssuerSigningKey = true,
+		};
+
+		var handler = new JwtSecurityTokenHandler();
+		try
+		{
+			var principal = handler.ValidateToken(jwtStr, tokenValidationParameters, out var validatedToken);
+			return principal;
+		}
+		catch (Exception ex)
+		{
+			{
+				Console.WriteLine($"JWT validation failed: {ex.Message}");
+				return null;
+			}
+		}
 	}
 
 	private string HashPassword(string password)
@@ -242,5 +277,36 @@ public class AuthController : ControllerBase
 			return NotFound("User not found");
 
 		return Accepted(updatedDbUser.GetSharedModel());
+	}
+
+	[HttpGet("tkn")]
+	public async Task<IActionResult> GetUserFromToken()
+	{
+		var authHeader = Request.Headers.Authorization.FirstOrDefault();
+
+		if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ")) return Unauthorized();
+
+		var jwt = authHeader.Substring("Bearer ".Length).Trim();
+
+		var pricip = ValidateJwtToken(jwt);
+
+		if (pricip == null) return Unauthorized();
+
+		var userId = pricip.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? pricip.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+		if (!string.IsNullOrEmpty(userId))
+		{
+			var dbUser = await _users.Find((x) => x.Id == userId).FirstOrDefaultAsync();
+
+			if (dbUser == null) return NotFound();
+
+			return Ok(new TokenUserResponse
+			{
+				Token = GenerateJwtToken(dbUser),
+				User = dbUser.GetSharedModel()
+			});
+		}
+
+		return NotFound();
 	}
 }

@@ -14,8 +14,9 @@ namespace Capstone.API.Models
 		public string? Email { get; set; }
 		public string Header { get; set; } = string.Empty;
 		public string Content { get; set; } = string.Empty;
-
 		public string Topic { get; set; } = string.Empty;
+		public bool Read { get; set; }
+		public DateTime SentDate { get; set; }
 
 		public ContactMessage GetSharedModel()
 		{
@@ -32,7 +33,9 @@ namespace Capstone.API.Models
 				Email = Email,
 				Header = Header,
 				Content = Content,
-				Topic = translatedTopic
+				Topic = translatedTopic,
+				Read = Read,
+				SentDate = SentDate
 			};
 		}
 	}

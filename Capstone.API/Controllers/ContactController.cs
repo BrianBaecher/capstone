@@ -79,9 +79,20 @@ namespace Capstone.API.Controllers
 		[HttpGet("unread")]
 		public async Task<IActionResult> GetUnreadCount([FromQuery] string topic)
 		{
-			var ct = await _contactMessages.CountDocumentsAsync((x) => x.Topic == topic);
+			var ct = await _contactMessages.CountDocumentsAsync((x) => x.Topic == topic && x.Read == false);
 			return Ok(ct);
 		}
 
+
+		[HttpPatch("{id:length(24)}/read")]
+		public async Task<IActionResult> UpdateReadStatus(string id, [FromBody] bool isRead)
+		{
+			var update = Builders<ContactMessage_DB>.Update.Set(x => x.Read, isRead);
+			var result = await _contactMessages.UpdateOneAsync(x => x.Id == id, update);
+
+			if (result.ModifiedCount == 0) return NotFound();
+
+			return NoContent();
+		}
 	}
 }

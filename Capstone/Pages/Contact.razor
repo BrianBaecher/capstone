@@ -73,6 +73,8 @@
 			contactMessage.User = sessionState.CurrentUser;
 		}
 
+		contactMessage.SentDate = DateTime.UtcNow;
+
 		await contactService.CreateMessageAsync(contactMessage);
 	}
 

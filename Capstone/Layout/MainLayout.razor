@@ -2,6 +2,7 @@
 @inject NavigationManager Navigation
 @inject Capstone.Services.SessionState sessionState
 @inject Radzen.DialogService dialogService
+@inject Capstone.Services.AuthService authService
 @using Microsoft.AspNetCore.Components;
 
 <div class="page">
@@ -89,4 +90,12 @@
 			title: ""
 		);
 	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		await authService.TryAutoLogin();
+	}
+
 }

@@ -4,7 +4,7 @@
 @using Capstone.Services
 @inject ContactService contactService
 
-<RadzenPanelMenu Style="width:300px" Multiple="true" class="rz-background-color-base-600">
+<RadzenPanelMenu Style="width:300px; position:fixed;" Multiple="true" class="rz-background-color-base-600">
 	<RadzenPanelMenuItem Text="Manage Users" Icon="group">
 		<RadzenPanelMenuItem Icon="search"
 							 Click="@((_)=>OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.UserSearch))">
@@ -33,10 +33,33 @@
 		</RadzenPanelMenuItem>
 	</RadzenPanelMenuItem>
 	<RadzenPanelMenuItem Text="Manage Feedback" Icon="feedback" Click="@((_) => { OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.Messages); })">
-		<RadzenPanelMenuItem Icon="edit"
-							 Click="@((_)=>{OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.DestinationEdit);})">
+		<RadzenPanelMenuItem Icon="support"
+							 Value="ContactMessage.MessageTopic.Support"
+							 Click="ReportTopicSelect">
 			<Template>
-				<PanelMenuItemTemplate Label="Support" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Support] />
+				<PanelMenuItemTemplate Label="Support"
+									   NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Support] />
+			</Template>
+		</RadzenPanelMenuItem>
+		<RadzenPanelMenuItem Icon="feedback"
+							 Value="ContactMessage.MessageTopic.Feedback"
+							 Click="ReportTopicSelect">
+			<Template>
+				<PanelMenuItemTemplate Label="Feedback" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Feedback] />
+			</Template>
+		</RadzenPanelMenuItem>
+		<RadzenPanelMenuItem Icon="money_bag"
+							 Value="ContactMessage.MessageTopic.Sales"
+							 Click="ReportTopicSelect">
+			<Template>
+				<PanelMenuItemTemplate Label="Sales" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Sales] />
+			</Template>
+		</RadzenPanelMenuItem>
+		<RadzenPanelMenuItem Icon="more_horiz"
+							 Value="ContactMessage.MessageTopic.Other"
+							 Click="ReportTopicSelect">
+			<Template>
+				<PanelMenuItemTemplate Label="Other" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Other] />
 			</Template>
 		</RadzenPanelMenuItem>
 	</RadzenPanelMenuItem>
@@ -45,6 +68,9 @@
 @code {
 	[Parameter]
 	public EventCallback<AdminSidebarSelections> OnMenuItemSelection { get; set; }
+
+	[Parameter]
+	public EventCallback<ContactMessage.MessageTopic> OnMessageTopicSelection { get; set; }
 
 	Dictionary<ContactMessage.MessageTopic, int> unreadMessageDict = new()
 	{
@@ -58,7 +84,7 @@
 	{
 		await base.OnInitializedAsync();
 
-		foreach(var topic in unreadMessageDict.Keys)
+		foreach (var topic in unreadMessageDict.Keys)
 		{
 			unreadMessageDict[topic] = await GetNumNotifications(topic) ?? 0;
 		}
@@ -69,5 +95,24 @@
 		return await contactService.GetUnreadCountAsync(topic.ToString());
 	}
 
-	const int num = 5;
+	public void UpdateUnreadMessageCount(ContactMessage.MessageTopic topic, bool isIncrease)
+	{
+		if (isIncrease)
+		{
+			unreadMessageDict[topic]++;
+		}
+		else
+		{
+			unreadMessageDict[topic]--;
+		}
+	}
+
+	private void ReportTopicSelect(MenuItemEventArgs e)
+	{
+		if(e.Value is ContactMessage.MessageTopic topic)
+		{
+			OnMessageTopicSelection.InvokeAsync(topic);
+		}
+	}
+
 }

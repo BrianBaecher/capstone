@@ -10,6 +10,10 @@
 
 		public MessageTopic Topic { get; set; }
 
+		public bool Read { get; set; }
+
+		public DateTime SentDate { get; set; }
+
 		public enum MessageTopic
 		{
 			Support,

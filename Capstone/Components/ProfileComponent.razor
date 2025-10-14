@@ -1,6 +1,7 @@
 ﻿@using Capstone.Shared.Models
 @using Capstone.Services
 @inject SessionState sessionState
+@inject NavigationManager navigationManager
 
 <RadzenCard Style="max-width: 420px">
 	<RadzenRow JustifyContent="JustifyContent.Center"
@@ -13,7 +14,14 @@
 			<ChildContent>
 				@if (User?.Role == "admin")
 				{
-					<RadzenProfileMenuItem Text="Admin Dashboard" Icon="build" Path="admin" />
+					if (!IsAtAdminPage())
+					{
+						<RadzenProfileMenuItem Text="Admin Dashboard" Icon="build" Path="admin" />
+					}
+					else
+					{
+						<RadzenProfileMenuItem Text="To Site" Icon="build" Path="" />
+					}
 				}
 				else
 				{
@@ -41,5 +49,10 @@
 	{
 		sessionState.SetUser(null);
 		await OnLogout.InvokeAsync();
+	}
+
+	private bool IsAtAdminPage()
+	{
+		return navigationManager.Uri.Contains("/admin");
 	}
 }

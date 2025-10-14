@@ -55,5 +55,13 @@ namespace Capstone.Services
 			}
 			return null;
 		}
+
+		public async Task<bool> UpdateMessageReadStatusAsync(string msgID, bool isRead)
+		{
+			var jsonContent = JsonContent.Create(isRead);
+			var res = await _httpClient.PatchAsync($"{URI}/{msgID}/read", jsonContent);
+
+			return res.IsSuccessStatusCode;
+		}
 	}
 }

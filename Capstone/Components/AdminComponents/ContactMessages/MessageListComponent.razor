@@ -1,5 +1,7 @@
 ﻿@namespace Capstone.Components.AdminComponents
 @using Capstone.Shared.Models
+@using Capstone.Services
+@inject ContactService contactService
 
 <RadzenText TextStyle="TextStyle.DisplayH6">
 	@(Topic.ToString() + " Messages")
@@ -9,16 +11,41 @@
 				PageSize="10"
 				AllowPaging=true>
 	<Template Context="msg">
-		<RadzenCard Variant="Variant.Outlined">
+		<RadzenCard Variant="Variant.Outlined" class="rz-background-color-base-200">
 			<RadzenStack>
-				<RadzenText>From: @GetMessageEmail(msg)</RadzenText>
-				<RadzenText>Subject: @msg.Header</RadzenText>
+				<RadzenRow JustifyContent="JustifyContent.SpaceBetween">
+					<RadzenStack Gap=".25rem" class="rz-border-bottom">
+						<RadzenText TextStyle="TextStyle.Subtitle1">Subject: @msg.Header</RadzenText>
+						<RadzenText TextStyle="TextStyle.Subtitle1">From: @GetMessageEmail(msg)</RadzenText>
+						<RadzenText TextStyle="TextStyle.Subtitle1">@msg.SentDate.ToShortDateString()</RadzenText>
+					</RadzenStack>
+					<RadzenStack Orientation="Orientation.Horizontal" AlignItems=AlignItems.Center Gap=".5rem" >
+						<RadzenButton Icon="reply" Style="max-height: 50%;" />
+						@if (msg.Read)
+						{
+							<RadzenButton Icon="mark_email_unread"
+										  IconColor="yellow"
+										  title="Mark Unread"
+										  Click="@(async (_)=>await SetMessageReadStatusAsync(msg, false))"
+										  Style="max-height: 50%;" />
+						}
+						else
+						{
+							<RadzenButton Icon="mark_email_read"
+										  IconColor="green"
+										  Style="max-height: 50%;"
+										  title="Mark Read"
+										  Click="@(async (_)=>await SetMessageReadStatusAsync(msg, true))" />
+
+						}
+						<RadzenButton Icon="delete"
+									  ButtonStyle="ButtonStyle.Danger"
+									  Style="max-height: 50%;"
+									  title="Delete"
+									  Click="@(async (_)=> await DeleteMessageAsync(msg))" />
+					</RadzenStack>
+				</RadzenRow>
 				<RadzenRow>
-					<RadzenColumn Size="2">
-						<RadzenText>
-							Message: 
-						</RadzenText>
-						</RadzenColumn>
 					<RadzenColumn>
 						<RadzenText TextStyle="TextStyle.Body1">
 							@msg.Content
@@ -37,6 +64,10 @@
 	[Parameter]
 	public required ContactMessage.MessageTopic Topic { get; set; }
 
+	[Parameter]
+	public EventCallback<(ContactMessage.MessageTopic topic, bool isIncrease)> OnReadStatusChange { get; set; }
+
+
 	private string GetMessageEmail(ContactMessage msg)
 	{
 		// if user, get user email
@@ -45,7 +76,32 @@
 			return msg.User.Email;
 		}
 
-		// else email should be popped
-		return msg.Email ?? "UH OH";
+		// email will have value
+		return msg.Email!;
+	}
+
+	private async Task SetMessageReadStatusAsync(ContactMessage msg, bool isRead)
+	{
+		if (msg.Id == null) return;
+		var res = await contactService.UpdateMessageReadStatusAsync(msg.Id, isRead);
+
+		if (res)
+		{
+			msg.Read = isRead;
+			await OnReadStatusChange.InvokeAsync((msg.Topic, !msg.Read));
+		}
+	}
+
+	private async Task DeleteMessageAsync(ContactMessage msg)
+	{
+		if (msg.Id == null) return;
+
+		var isDeleted = await contactService.DeleteMessageAsync(msg.Id);
+
+		if (isDeleted)
+		{
+			Messages.Remove(msg);
+			StateHasChanged();
+		}
 	}
 }

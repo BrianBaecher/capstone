@@ -2,6 +2,7 @@
 @using Capstone.Shared.Models
 @namespace Capstone.Components.AdminComponents
 @inject ContactService contactService
+@inject IJSRuntime JS
 
 @if (!isDataFetched)
 {
@@ -11,11 +12,19 @@ else
 {
 	foreach (var kvp in messageDict)
 	{
-		<MessageListComponent Messages="kvp.Value" Topic="kvp.Key" />
+		<div id="topic-@kvp.Key.ToString()">
+			<MessageListComponent Messages="kvp.Value"
+								  Topic="kvp.Key"
+								  OnReadStatusChange="OnReadStatusChange" />
+		</div>
 	}
 }
 
 @code {
+	// prop-drilling...
+	[Parameter]
+	public EventCallback<(ContactMessage.MessageTopic topic, bool isIncrease)> OnReadStatusChange { get; set; }
+
 	Dictionary<ContactMessage.MessageTopic, List<ContactMessage>> messageDict = new();
 
 	bool isDataFetched;
@@ -24,7 +33,7 @@ else
 	{
 		await base.OnInitializedAsync();
 
-		// should be empty dict already but...
+		// should be empty dict already...
 		if (messageDict.Keys.Count > 0) messageDict.Clear();
 
 		foreach (var enumVal in Enum.GetValues<ContactMessage.MessageTopic>())
@@ -50,4 +59,9 @@ else
 		isDataFetched = true;
 	}
 
+	public async Task ScrollToTopic(ContactMessage.MessageTopic topic)
+	{
+		// Console.WriteLine("figma ligma " + topic.ToString());
+		await JS.InvokeVoidAsync("scrollToElementById", $"topic-{topic}");
+	}
 }
