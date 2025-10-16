@@ -1,61 +1,71 @@
 ﻿@namespace Capstone.Components.AdminComponents
 @using Capstone.Shared.Models
 @using Capstone.Services
+@using System.Text
 @inject ContactService contactService
+@inject TestimonialService testimonialService
 
-<RadzenText TextStyle="TextStyle.DisplayH6">
-	@(Topic.ToString() + " Messages")
-</RadzenText>
-<RadzenDataList TItem="ContactMessage"
-				Data="Messages"
-				PageSize="10"
-				AllowPaging=true>
-	<Template Context="msg">
-		<RadzenCard Variant="Variant.Outlined" class="rz-background-color-base-200">
-			<RadzenStack>
-				<RadzenRow JustifyContent="JustifyContent.SpaceBetween">
-					<RadzenStack Gap=".25rem" class="rz-border-bottom">
-						<RadzenText TextStyle="TextStyle.Subtitle1">Subject: @msg.Header</RadzenText>
-						<RadzenText TextStyle="TextStyle.Subtitle1">From: @GetMessageEmail(msg)</RadzenText>
-						<RadzenText TextStyle="TextStyle.Subtitle1">@msg.SentDate.ToShortDateString()</RadzenText>
-					</RadzenStack>
-					<RadzenStack Orientation="Orientation.Horizontal" AlignItems=AlignItems.Center Gap=".5rem" >
-						<RadzenButton Icon="reply" Style="max-height: 50%;" />
-						@if (msg.Read)
-						{
-							<RadzenButton Icon="mark_email_unread"
-										  IconColor="yellow"
-										  title="Mark Unread"
-										  Click="@(async (_)=>await SetMessageReadStatusAsync(msg, false))"
-										  Style="max-height: 50%;" />
-						}
-						else
-						{
-							<RadzenButton Icon="mark_email_read"
-										  IconColor="green"
+<RadzenCard Variant="Variant.Outlined">
+	<RadzenText TextStyle="TextStyle.DisplayH6">
+		@(Topic.ToString() + " Messages")
+	</RadzenText>
+	<RadzenDataList TItem="ContactMessage"
+					Data="Messages"
+					PageSize="10"
+					AllowPaging=true>
+		<Template Context="msg">
+			<RadzenCard Variant="Variant.Outlined" class="rz-background-color-base-200">
+				<RadzenStack>
+					<RadzenRow JustifyContent="JustifyContent.SpaceBetween">
+						<RadzenStack Gap=".25rem" class="rz-border-bottom">
+							<RadzenText TextStyle="TextStyle.Subtitle1">Subject: @msg.Header</RadzenText>
+							<RadzenText TextStyle="TextStyle.Subtitle1">From: @GetMessageEmail(msg)</RadzenText>
+							<RadzenText TextStyle="TextStyle.Subtitle1">@msg.SentDate.ToShortDateString()</RadzenText>
+						</RadzenStack>
+						<RadzenStack Orientation="Orientation.Horizontal" AlignItems=AlignItems.Center Gap=".5rem">
+							<RadzenButton Icon="reply" Style="max-height: 50%;" />
+							@if (msg.Read)
+							{
+								<RadzenButton Icon="mark_email_unread"
+											  IconColor="yellow"
+											  title="Mark Unread"
+											  Click="@(async (_)=>await SetMessageReadStatusAsync(msg, false))"
+											  Style="max-height: 50%;" />
+							}
+							else
+							{
+								<RadzenButton Icon="mark_email_read"
+											  IconColor="green"
+											  Style="max-height: 50%;"
+											  title="Mark Read"
+											  Click="@(async (_)=>await SetMessageReadStatusAsync(msg, true))" />
+
+							}
+							<RadzenButton Icon="delete"
+										  ButtonStyle="ButtonStyle.Danger"
 										  Style="max-height: 50%;"
-										  title="Mark Read"
-										  Click="@(async (_)=>await SetMessageReadStatusAsync(msg, true))" />
-
+										  title="Delete"
+										  Click="@(async (_)=> await DeleteMessageAsync(msg))" />
+						</RadzenStack>
+					</RadzenRow>
+					<RadzenRow>
+						<RadzenColumn>
+							<RadzenText TextStyle="TextStyle.Body1">
+								@msg.Content
+							</RadzenText>
+						</RadzenColumn>
+						@if (msg.IsTestimonial)
+						{
+							<RadzenColumn Size="2">
+								<RadzenButton Text="Add to Testimonials" Icon="add" Click="@(() => AddToTestimonials(msg))" />
+							</RadzenColumn>
 						}
-						<RadzenButton Icon="delete"
-									  ButtonStyle="ButtonStyle.Danger"
-									  Style="max-height: 50%;"
-									  title="Delete"
-									  Click="@(async (_)=> await DeleteMessageAsync(msg))" />
-					</RadzenStack>
-				</RadzenRow>
-				<RadzenRow>
-					<RadzenColumn>
-						<RadzenText TextStyle="TextStyle.Body1">
-							@msg.Content
-						</RadzenText>
-					</RadzenColumn>
-				</RadzenRow>
-			</RadzenStack>
-		</RadzenCard>
-	</Template>
-</RadzenDataList>
+					</RadzenRow>
+				</RadzenStack>
+			</RadzenCard>
+		</Template>
+	</RadzenDataList>
+</RadzenCard>
 
 @code {
 	[Parameter]
@@ -103,5 +113,42 @@
 			Messages.Remove(msg);
 			StateHasChanged();
 		}
+	}
+
+	private async Task<bool> AddToTestimonials(ContactMessage msg)
+	{
+		if (string.IsNullOrEmpty(msg.TestimonialDisplayName)) return false;
+
+		var name = TreatDisplayName(msg.TestimonialDisplayName);
+
+		if (name == null) return false;
+
+		Testimonial testimonial = new()
+		{
+			Author = name,
+			Content = msg.Content
+		};
+
+		var res = await testimonialService.CreateAsync(testimonial);
+
+		return res != null;
+	}
+
+	private string? TreatDisplayName(string name)
+	{
+		if (string.IsNullOrEmpty(name)) return null;
+
+		StringBuilder sb = new();
+		var split = name.Trim().Split();
+
+		sb.Append(split[0]);
+		sb[0] = char.ToUpper(sb[0]);
+
+		if (split.Length > 1)
+		{
+			sb.Append($" {char.ToUpper(split[1][0])}.");
+		}
+
+		return sb.ToString();
 	}
 }

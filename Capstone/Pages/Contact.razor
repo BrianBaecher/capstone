@@ -3,69 +3,97 @@
 @using Capstone.Services
 @inject SessionState sessionState
 @inject ContactService contactService
-
-<RadzenCard Variant="Variant.Outlined" Style="width: 80%; max-width:800px;" class="rz-background-color-base-400">
-	<RadzenTemplateForm TItem="ContactMessage" Data="@contactMessage" Submit="OnSubmit">
-		<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem" class="rz-p-sm-12">
-			<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">What are you contacting us about?</RadzenText>
-			<RadzenLabel Component="DropDownBindValue" />
-			<RadzenDropDown @bind-Value=@dropdownVal Data=@topicOptions Style="width: 100%; max-width: 400px;" Name="DropDownBindValue" Placeholder="Select One" Change="@(() => Console.WriteLine(contactMessage.Topic))" />
-		</RadzenStack>
-		<RadzenRow Gap="0.5rem" class="rz-p-sm-6">
-			<RadzenColumn Size="2">
-				<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Message Title</RadzenText>
-			</RadzenColumn>
-			<RadzenColumn>
-				<RadzenTextBox @bind-Value=@contactMessage.Header Style="width:100%;" />
-			</RadzenColumn>
-		</RadzenRow>
-		<RadzenRow Gap="0.5rem" class="rz-p-sm-6">
-			<RadzenColumn Size="2">
-				<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Message Content</RadzenText>
-			</RadzenColumn>
-			<RadzenColumn>
-				<RadzenTextArea @bind-Value=@contactMessage.Content Name="messageContent" Style="width:100%;" />
-				<RadzenRequiredValidator Component="messageContent" Text="Message text is required." />
-			</RadzenColumn>
-		</RadzenRow>
-		@if (sessionState.CurrentUser == null)
-		{
+<RadzenStack AlignItems="AlignItems.Center">
+	<RadzenCard Variant="Variant.Outlined" Style="width: 80%; max-width:800px;" class="rz-background-color-base-400">
+		<RadzenTemplateForm TItem="ContactMessage" Data="@contactMessage" Submit="OnSubmit">
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.5rem" class="rz-p-sm-12">
+				<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">What are you contacting us about?</RadzenText>
+				<RadzenLabel Component="DropDownBindValue" />
+				<RadzenDropDown TValue="string"
+								Data=@(Enum.GetNames<ContactMessage.MessageTopic>())
+								Style="width: 100%; max-width: 400px;"
+								Placeholder="Select One"
+								Change="@((x) => HandleDropdownChange(x))" />
+			</RadzenStack>
 			<RadzenRow Gap="0.5rem" class="rz-p-sm-6">
 				<RadzenColumn Size="2">
-					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Email Address</RadzenText>
+					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Message Title</RadzenText>
 				</RadzenColumn>
 				<RadzenColumn>
-					<RadzenTextBox @bind-Value=@contactMessage.Email Name="Email" />
-					<RadzenRequiredValidator Component="Email" Text="Email is required" />
-					<RadzenEmailValidator Component="Email" Text="Provide a valid email address" />
+					<RadzenTextBox @bind-Value=@contactMessage.Header Style="width:100%;" />
 				</RadzenColumn>
 			</RadzenRow>
-		}
-		<RadzenButton ButtonType="ButtonType.Submit" Text="Submit Message" />
-	</RadzenTemplateForm>
-</RadzenCard>
+			<RadzenRow Gap="0.5rem" class="rz-p-sm-6">
+				<RadzenColumn Size="2">
+					<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Message Content</RadzenText>
+				</RadzenColumn>
+				<RadzenColumn>
+					<RadzenTextArea @bind-Value=@contactMessage.Content Name="messageContent" Style="width:100%;" />
+					<RadzenRequiredValidator Component="messageContent" Text="Message text is required." />
+				</RadzenColumn>
+			</RadzenRow>
+			@if (contactMessage.Topic == ContactMessage.MessageTopic.Feedback)
+			{
+				<RadzenRow Gap="0.5rem" class="rz-p-sm-6">
+					<RadzenStack>
+						<RadzenRow>
+							<RadzenText TextStyle="TextStyle.Subtitle2">Would you like to have your feedback considered for display in our site's testimonials?</RadzenText>
+							<RadzenCheckBox TValue="bool"
+											@bind-Value=@contactMessage.IsTestimonial
+											class="@(contactMessage.IsTestimonial ? "rz-background-color-success-light" : "rz-background-color-danger-light")" />
+						</RadzenRow>
+						@if (contactMessage.IsTestimonial)
+						{
+							<RadzenText TextStyle="TextStyle.Subtitle2">Please enter the name you'd like to be displayed along with your testimonial.</RadzenText>
+							<RadzenTextBox @bind-Value=@contactMessage.TestimonialDisplayName />
+							<RadzenRequiredValidator Text="A name is required for testimonial submission." />
+						}
+					</RadzenStack>
+				</RadzenRow>
+			}
+			@if (sessionState.CurrentUser == null)
+			{
+				<RadzenRow Gap="0.5rem" class="rz-p-sm-6">
+					<RadzenColumn Size="2">
+						<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Email Address</RadzenText>
+					</RadzenColumn>
+					<RadzenColumn>
+						<RadzenTextBox @bind-Value=@contactMessage.Email Name="Email" />
+						<RadzenRequiredValidator Component="Email" Text="Email is required" />
+						<RadzenEmailValidator Component="Email" Text="Provide a valid email address" />
+					</RadzenColumn>
+				</RadzenRow>
+			}
+			<RadzenRow JustifyContent="JustifyContent.Center">
+				<RadzenButton ButtonType="ButtonType.Submit" Text="Submit Message" />
+			</RadzenRow>
+		</RadzenTemplateForm>
+	</RadzenCard>
+	@if (submitted)
+	{
+		<RadzenRow>
+			<Capstone.Components.SuccessIndicator IsSuccess=submitSuccess
+												  SuccessMessage="Your message was sent!"
+												  FailureMessage="Something went wrong!" />
+
+			<RadzenButton Text="OK" Click="ResetForm" />
+		</RadzenRow>
+	}
+</RadzenStack>
 
 @code {
 	ContactMessage contactMessage = new();
 
-	string? dropdownVal;
-
 	IEnumerable<string> topicOptions = Enum.GetNames(typeof(ContactMessage.MessageTopic));
+
+	bool submitted;
+	bool submitSuccess;
 
 	async Task OnSubmit()
 	{
 		if (string.IsNullOrWhiteSpace(contactMessage.Header))
 		{
 			contactMessage.Header = "New Message";
-		}
-
-		if (Enum.TryParse<ContactMessage.MessageTopic>(dropdownVal, out var asEnum))
-		{
-			contactMessage.Topic = asEnum;
-		}
-		else
-		{
-			contactMessage.Topic = ContactMessage.MessageTopic.Other;
 		}
 
 		if (sessionState.CurrentUser != null)
@@ -75,7 +103,25 @@
 
 		contactMessage.SentDate = DateTime.UtcNow;
 
-		await contactService.CreateMessageAsync(contactMessage);
+		var res = await contactService.CreateMessageAsync(contactMessage);
+
+		submitted = true;
+
+		submitSuccess = res != null;
 	}
 
+	private void ResetForm()
+	{
+		contactMessage = new();
+		submitted = false;
+		submitSuccess = false;
+	}
+
+	private void HandleDropdownChange(object arg)
+	{
+		// string is passed as anon obj, from dropdown which gets populated by enum.getnames
+		if (arg is not string s || !Enum.TryParse<ContactMessage.MessageTopic>(s, out var result)) return;
+
+		contactMessage.Topic = result;
+	}
 }

@@ -16,11 +16,16 @@ namespace Capstone.API.Models
 		public string Content { get; set; } = string.Empty;
 		public string Topic { get; set; } = string.Empty;
 		public bool Read { get; set; }
+
+		public bool IsTestimonial { get; set; }
+
+		public string? TestimonialDisplayName { get; set; }
+
 		public DateTime SentDate { get; set; }
 
 		public ContactMessage GetSharedModel()
 		{
-			ContactMessage.MessageTopic translatedTopic = ContactMessage.MessageTopic.Other;
+			ContactMessage.MessageTopic translatedTopic = ContactMessage.MessageTopic.Other; // Other is fallback if parse fails (which it shouldn't)
 			if (Enum.TryParse<ContactMessage.MessageTopic>(Topic, out var asEnum))
 			{
 				translatedTopic = asEnum;
@@ -35,7 +40,9 @@ namespace Capstone.API.Models
 				Content = Content,
 				Topic = translatedTopic,
 				Read = Read,
-				SentDate = SentDate
+				SentDate = SentDate,
+				IsTestimonial = IsTestimonial,
+				TestimonialDisplayName = TestimonialDisplayName,
 			};
 		}
 	}

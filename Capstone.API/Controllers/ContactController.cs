@@ -60,6 +60,9 @@ namespace Capstone.API.Controllers
 				Header = message.Header,
 				Content = message.Content,
 				Topic = message.Topic.ToString(),
+				IsTestimonial = message.IsTestimonial,
+				TestimonialDisplayName = message.TestimonialDisplayName,
+				SentDate = message.SentDate,
 			};
 
 			await _contactMessages.InsertOneAsync(dbMessage);

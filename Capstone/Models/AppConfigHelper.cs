@@ -35,11 +35,11 @@ namespace Capstone.Models
 				(typeof(BlogPostService), ServiceLifetime.Scoped),
 				(typeof(ImageService), ServiceLifetime.Scoped),
 				(typeof(TestimonialService), ServiceLifetime.Scoped),
-				(typeof(TravelPackageService), ServiceLifetime.Scoped),
 				(typeof(DialogService), ServiceLifetime.Scoped), // Radzen service type, not my creation.
 				(typeof(AuthService), ServiceLifetime.Scoped),
 				(typeof(SessionState), ServiceLifetime.Scoped),
-				(typeof(ContactService), ServiceLifetime.Scoped)
+				(typeof(ContactService), ServiceLifetime.Scoped),
+				(typeof(ReservationService), ServiceLifetime.Scoped)
 			};
 
 			private enum ServiceLifetime

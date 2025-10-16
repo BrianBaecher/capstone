@@ -1,11 +1,34 @@
 ﻿@page "/travel"
-@using Radzen.Blazor
 @using Capstone.Shared.Models;
+@using Capstone.Services
+@inject DestinationService destinationService
 
 
 <RadzenStack>
-
+	@if (destinations.Count == 0)
+	{
+		<RadzenText>LOAD</RadzenText>
+	}
+	else
+	{
+		foreach (var d in destinations)
+		{
+			<Capstone.Components.DestinationPurchaseComponent Destination="d" />
+		}
+	}
 </RadzenStack>
 
 @code {
+
+	List<Destination> destinations = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		var dest = await destinationService.GetAllAsync();
+
+		destinations = dest.ToList();
+	}
+
 }

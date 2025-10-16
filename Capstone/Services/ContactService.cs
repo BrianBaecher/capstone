@@ -31,7 +31,12 @@ namespace Capstone.Services
 		{
 			var response = await _httpClient.PostAsJsonAsync("api/contact", message);
 			response.EnsureSuccessStatusCode();
-			return await response.Content.ReadFromJsonAsync<ContactMessage>();
+
+			if (response.IsSuccessStatusCode)
+			{
+				return await response.Content.ReadFromJsonAsync<ContactMessage>();
+			}
+			return null;
 		}
 
 		public async Task<bool> DeleteMessageAsync(string id)

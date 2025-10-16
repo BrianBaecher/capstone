@@ -1,0 +1,22 @@
+﻿
+
+<RadzenRow JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+	<RadzenIcon Icon=@(IsSuccess ? "done_outline" : "dangerous")
+				IconColor=@(IsSuccess ? Colors.Success : Colors.Danger)
+				Style="font-size: 48px;"
+				class="filled-icon" />
+	<RadzenText TextStyle="TextStyle.DisplayH6" class="rz-m-0">
+		@(IsSuccess ? SuccessMessage : FailureMessage)
+	</RadzenText>
+</RadzenRow>
+
+@code {
+	[Parameter]
+	public required bool IsSuccess { get; set; }
+
+	[Parameter]
+	public required string SuccessMessage { get; set; }
+
+	[Parameter]
+	public required string FailureMessage { get; set; }
+}

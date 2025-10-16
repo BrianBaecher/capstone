@@ -11,7 +11,6 @@
 <div class="layout-container" style="display: flex; min-height: 100vh;">
 	<div class="sidebar rz-background-color-base-600" style="width: 300px;">
 		<AdminSidebar OnMenuItemSelection="RenderContent"
-					  OnMessageTopicSelection="HandleMessageTopicSelection"
 					  @ref=sidebar />
 	</div>
 	<div class="main" style="flex: 1;">
@@ -29,7 +28,7 @@
 
 @code {
 
-	AdminSidebar sidebar;
+	AdminSidebar? sidebar;
 
 	RenderFragment? frag;
 
@@ -49,14 +48,14 @@
 				frag =@<EditDestinationComponent />;
 				break;
 			case AdminSidebarSelections.Messages:
-				frag =@<ContactMessageDisplayComponent OnReadStatusChange="HandleUnreadMessageCountChange" @ref=idk />;
+				frag =@<ContactMessageDisplayComponent @ref=messageDisplay />;
 				break;
 			default:
 				break;
 		}
 	}
 
-	ContactMessageDisplayComponent idk;
+	ContactMessageDisplayComponent? messageDisplay;
 
 	private void OnLogout()
 	{
@@ -72,15 +71,5 @@
 		}
 	}
 
-	private void HandleUnreadMessageCountChange((ContactMessage.MessageTopic topic, bool isIncrease) args)
-	{
-		// used as prop-drilled callback in message display -> message list components, updates sidebar count.
-		// args is a tuple, because EventCallback only takes one <T> as argument.
-		sidebar?.UpdateUnreadMessageCount(args.topic, args.isIncrease);
-	}
-
-	private void HandleMessageTopicSelection(ContactMessage.MessageTopic topic)
-	{
-		idk?.ScrollToTopic(topic);
-	}
+	
 }

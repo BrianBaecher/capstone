@@ -32,37 +32,7 @@
 			</Template>
 		</RadzenPanelMenuItem>
 	</RadzenPanelMenuItem>
-	<RadzenPanelMenuItem Text="Manage Feedback" Icon="feedback" Click="@((_) => { OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.Messages); })">
-		<RadzenPanelMenuItem Icon="support"
-							 Value="ContactMessage.MessageTopic.Support"
-							 Click="ReportTopicSelect">
-			<Template>
-				<PanelMenuItemTemplate Label="Support"
-									   NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Support] />
-			</Template>
-		</RadzenPanelMenuItem>
-		<RadzenPanelMenuItem Icon="feedback"
-							 Value="ContactMessage.MessageTopic.Feedback"
-							 Click="ReportTopicSelect">
-			<Template>
-				<PanelMenuItemTemplate Label="Feedback" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Feedback] />
-			</Template>
-		</RadzenPanelMenuItem>
-		<RadzenPanelMenuItem Icon="money_bag"
-							 Value="ContactMessage.MessageTopic.Sales"
-							 Click="ReportTopicSelect">
-			<Template>
-				<PanelMenuItemTemplate Label="Sales" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Sales] />
-			</Template>
-		</RadzenPanelMenuItem>
-		<RadzenPanelMenuItem Icon="more_horiz"
-							 Value="ContactMessage.MessageTopic.Other"
-							 Click="ReportTopicSelect">
-			<Template>
-				<PanelMenuItemTemplate Label="Other" NumOfNotifications=@unreadMessageDict[ContactMessage.MessageTopic.Other] />
-			</Template>
-		</RadzenPanelMenuItem>
-	</RadzenPanelMenuItem>
+	<RadzenPanelMenuItem Text="Messages" Icon="feedback" Click="@((_) => { OnMenuItemSelection.InvokeAsync(AdminSidebarSelections.Messages); })" />
 </RadzenPanelMenu>
 
 @code {
@@ -72,44 +42,10 @@
 	[Parameter]
 	public EventCallback<ContactMessage.MessageTopic> OnMessageTopicSelection { get; set; }
 
-	Dictionary<ContactMessage.MessageTopic, int> unreadMessageDict = new()
-	{
-		{ContactMessage.MessageTopic.Support, 0},
-		{ContactMessage.MessageTopic.Feedback, 0},
-		{ContactMessage.MessageTopic.Sales, 0},
-		{ContactMessage.MessageTopic.Other, 0},
-	};
-
-	protected override async Task OnInitializedAsync()
-	{
-		await base.OnInitializedAsync();
-
-		foreach (var topic in unreadMessageDict.Keys)
-		{
-			unreadMessageDict[topic] = await GetNumNotifications(topic) ?? 0;
-		}
-	}
-
-	private async Task<int?> GetNumNotifications(ContactMessage.MessageTopic topic)
-	{
-		return await contactService.GetUnreadCountAsync(topic.ToString());
-	}
-
-	public void UpdateUnreadMessageCount(ContactMessage.MessageTopic topic, bool isIncrease)
-	{
-		if (isIncrease)
-		{
-			unreadMessageDict[topic]++;
-		}
-		else
-		{
-			unreadMessageDict[topic]--;
-		}
-	}
 
 	private void ReportTopicSelect(MenuItemEventArgs e)
 	{
-		if(e.Value is ContactMessage.MessageTopic topic)
+		if (e.Value is ContactMessage.MessageTopic topic)
 		{
 			OnMessageTopicSelection.InvokeAsync(topic);
 		}

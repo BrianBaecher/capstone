@@ -10,14 +10,20 @@
 }
 else
 {
-	foreach (var kvp in messageDict)
-	{
-		<div id="topic-@kvp.Key.ToString()">
-			<MessageListComponent Messages="kvp.Value"
-								  Topic="kvp.Key"
-								  OnReadStatusChange="OnReadStatusChange" />
-		</div>
-	}
+	<RadzenAccordion>
+		<Items>
+			@foreach (var kvp in messageDict)
+			{
+				<RadzenAccordionItem Template=@CreateHeaderTemplate(kvp.Key)
+									 MouseEnter="OnMouseEnter"
+									 MouseLeave="OnMouseExit">
+					<MessageListComponent Messages="kvp.Value"
+										  Topic="kvp.Key"
+										  OnReadStatusChange="UpdateUnreadMessageCount" />
+				</RadzenAccordionItem>
+			}
+		</Items>
+	</RadzenAccordion>
 }
 
 @code {
@@ -28,6 +34,8 @@ else
 	Dictionary<ContactMessage.MessageTopic, List<ContactMessage>> messageDict = new();
 
 	bool isDataFetched;
+
+	RenderFragment test =@<SuccessIndicator IsSuccess=true FailureMessage="no" SuccessMessage="yes" />;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -50,18 +58,83 @@ else
 		}
 
 		// separate by topic
-		// feed separate lists into list display components...
 		foreach (var msg in messages)
 		{
 			messageDict[msg.Topic].Add(msg);
 		}
 
+		foreach(var key in unreadMessageDict.Keys)
+		{
+			var n = await GetNumNotifications(key);
+			unreadMessageDict[key] = n ?? 0;
+		}
+
 		isDataFetched = true;
 	}
 
-	public async Task ScrollToTopic(ContactMessage.MessageTopic topic)
+	private string TopicIconHandler(ContactMessage.MessageTopic topic)
 	{
-		// Console.WriteLine("figma ligma " + topic.ToString());
-		await JS.InvokeVoidAsync("scrollToElementById", $"topic-{topic}");
+		switch (topic)
+		{
+			case ContactMessage.MessageTopic.Support:
+				return "support";
+			case ContactMessage.MessageTopic.Feedback:
+				return "feedback";
+			case ContactMessage.MessageTopic.Sales:
+				return "money_bag";
+			case ContactMessage.MessageTopic.Other:
+				return "more_horiz";
+			default:
+				return "question_mark";
+		}
+	}
+
+	private RenderFragment CreateHeaderTemplate(ContactMessage.MessageTopic topic)
+	{
+		RenderFragment fragment =@<AccordionHeaderTemplate HeaderText="@topic.ToString()"
+								 Icon="@TopicIconHandler(topic)"
+								 NumNotifications="@unreadMessageDict[topic]" />;
+
+		return fragment;
+	}
+
+	Dictionary<ContactMessage.MessageTopic, int> unreadMessageDict = new()
+	{
+		{ContactMessage.MessageTopic.Support, 0},
+		{ContactMessage.MessageTopic.Feedback, 0},
+		{ContactMessage.MessageTopic.Sales, 0},
+		{ContactMessage.MessageTopic.Other, 0},
+	};
+
+	private async Task<int?> GetNumNotifications(ContactMessage.MessageTopic topic)
+	{
+		return await contactService.GetUnreadCountAsync(topic.ToString());
+	}
+
+	public void UpdateUnreadMessageCount((ContactMessage.MessageTopic topic, bool isIncrease) arg)
+	{
+		if (arg.isIncrease)
+		{
+			unreadMessageDict[arg.topic]++;
+		}
+		else
+		{
+			unreadMessageDict[arg.topic]--;
+		}
+	}
+
+	private async Task OnMouseEnter(ElementReference element)
+	{
+		var classlist = await JS.InvokeAsync<string[]>("domHelpers.getClassList", element);
+
+		await JS.InvokeVoidAsync("domHelpers.addClass", element, "rz-background-color-info-lighter");
+	}
+
+
+	private async Task OnMouseExit(ElementReference element)
+	{
+		var classlist = await JS.InvokeAsync<string[]>("domHelpers.getClassList", element);
+
+		await JS.InvokeVoidAsync("domHelpers.removeClass", element, "rz-background-color-info-lighter");
 	}
 }

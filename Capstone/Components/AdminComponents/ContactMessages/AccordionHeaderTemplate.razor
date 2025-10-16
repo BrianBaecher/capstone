@@ -1,0 +1,40 @@
+﻿@namespace Capstone.Components
+
+<RadzenStack Orientation="Orientation.Horizontal"
+			 AlignItems="AlignItems.Center"
+			 JustifyContent="JustifyContent.SpaceBetween"
+			 Gap="2rem">
+	@if (Icon != null)
+	{
+		<RadzenIcon Icon="@Icon" />
+	}
+	<RadzenColumn Size="4">
+		<RadzenText TextStyle="TextStyle.DisplayH5" class="rz-m-0">
+			@HeaderText
+		</RadzenText>
+	</RadzenColumn>
+	@if (NumNotifications > 0)
+	{
+		<RadzenRow JustifyContent=JustifyContent.Start
+					 AlignItems="AlignItems.Center" Gap="0rem"
+					 class="rz-border-radius-6 rz-background-color-danger-light rz-px-1">
+			<RadzenIcon Icon="mail" class="rz-mx-1" />
+			<RadzenText TextStyle="TextStyle.Subtitle2"
+						
+						class="rz-m-0">
+				<strong>@NumNotifications.ToString()</strong>
+			</RadzenText>
+		</RadzenRow>
+	}
+</RadzenStack>
+
+@code {
+	[Parameter]
+	public required string HeaderText { get; set; }
+
+	[Parameter]
+	public string? Icon { get; set; }
+
+	[Parameter]
+	public int NumNotifications { get; set; }
+}

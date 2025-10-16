@@ -25,8 +25,6 @@ public class AuthController : ControllerBase
 	[HttpPost("login")]
 	public async Task<IActionResult> Login([FromBody] LoginRequest request)
 	{
-		Console.WriteLine($"FROM BACK: {request.Username}:{request.Password}");
-
 		var userRecord = await _users.Find(u => u.Username == request.Username).FirstOrDefaultAsync();
 		if (userRecord == null)
 			return Unauthorized(
@@ -235,13 +233,6 @@ public class AuthController : ControllerBase
 
 		return Ok(users);
 	}
-
-	//[Authorize(Roles = "admin")]
-	//[HttpPost("users")]
-	//public async Task<IActionResult> CreateUser([FromBody] User user)
-	//{
-	//	var res = await _users.InsertOneAsync(user);
-	//}
 
 	[Authorize(Roles = "admin")]
 	[HttpDelete("users")]

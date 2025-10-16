@@ -1,0 +1,84 @@
+﻿@using Capstone.Shared.Models
+@using Capstone.Services
+@inject ReservationService reservationService
+@inject SessionState sessionState
+
+<RadzenCard Variant="Variant.Outlined">
+	<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceEvenly" AlignItems="AlignItems.Center" Gap=".5rem">
+		<DestinationCard Destination="Destination" />
+
+		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+			<RadzenStack Orientation=Orientation.Horizontal JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+				<RadzenStack>
+					<RadzenLabel Text="Select Start Date" Component="startDatePicker" />
+					<RadzenDatePicker @bind-Value=startDate
+									  Name="startDatePicker"
+									  Min="DateTime.Today"
+									  Change="@(() => SetNumDays())" />
+				</RadzenStack>
+				<RadzenStack>
+					<RadzenLabel Text="Select End Date" Component="endDatePicker" />
+					<RadzenDatePicker @bind-Value=endDate
+									  Name="endDatePicker"
+									  Min="@(startDate.HasValue? startDate.Value.Date.AddDays(1) : null)"
+									  Change="@(() => SetNumDays())" />
+				</RadzenStack>
+			</RadzenStack>
+
+			@if (startDate.HasValue && endDate.HasValue)
+			{
+				<RadzenRow JustifyContent="JustifyContent.SpaceEvenly" AlignItems="AlignItems.Center">
+					<RadzenText TextStyle="TextStyle.Body1">
+						Duration of Stay: @(numDays.ToString() + (numDays == 1 ? " day" : " days"))
+					</RadzenText>
+					<RadzenText TextStyle="TextStyle.Body1">
+						Price of Stay: @GetFormattedStayPrice()
+					</RadzenText>
+				</RadzenRow>
+				<RadzenRow JustifyContent="JustifyContent.SpaceEvenly" AlignItems="AlignItems.Center">
+					<RadzenButton ButtonStyle="ButtonStyle.Success" Text="Reserve" Icon="checked_bag" />
+					<RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Cancel" Icon="delete" />
+				</RadzenRow>
+			}
+		</RadzenStack>
+	</RadzenStack>
+</RadzenCard>
+
+@code {
+	[Parameter]
+	public required Destination Destination { get; set; }
+
+	DateTime? startDate;
+	DateTime? endDate;
+	int numDays;
+
+	private void SetNumDays()
+	{
+		if (!startDate.HasValue || !endDate.HasValue) return;
+
+		numDays = (endDate.Value.Date - startDate.Value.Date).Days;
+	}
+
+	private string GetFormattedStayPrice()
+	{
+		var price = (float)(numDays * Destination.PricePerDay);
+
+		return price.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+	}
+
+	private async Task ReserveTrip()
+	{
+		if (sessionState.CurrentUser == null) return;
+
+		TripReservation tripReservation = new()
+		{
+			Destination = Destination,
+			DurationOfStay = TimeSpan.FromDays(numDays),
+			User = sessionState.CurrentUser,
+			Price = (float)(numDays * Destination.PricePerDay)
+		};
+
+		var isSuccess = await reservationService.CreateReservationAsync(tripReservation);
+	}
+
+}
