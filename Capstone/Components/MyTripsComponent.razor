@@ -1,0 +1,39 @@
+﻿@using Capstone.Services
+@using Capstone.Shared.Models
+@inject ReservationService reservationService
+
+<RadzenStack Gap="2rem">
+	@if(reservations.Count == 0)
+	{
+		<RadzenText TextStyle="TextStyle.Body1">No reservations to display.</RadzenText>
+	}
+	else
+	{
+		foreach(var res in reservations)
+		{
+			<RadzenCard Variant="Variant.Outlined">
+				<RadzenStack>
+					<RadzenText TextStyle="TextStyle.DisplayH5">Trip to @res.Destination.Name</RadzenText>
+					<RadzenText TextStyle="TextStyle.Body1">
+						@res.StartDate.ToShortDateString() - @res.EndDate.ToShortDateString()
+					</RadzenText>
+					<RadzenText>@res.Price.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</RadzenText>
+				</RadzenStack>
+			</RadzenCard>
+		}
+	}
+</RadzenStack>
+
+@code {
+	[Parameter]
+	public required User User { get; set; }
+
+	List<TripReservation> reservations = new();
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await base.OnParametersSetAsync();
+
+		reservations = await reservationService.GetUserReservations(User);
+	}
+}

@@ -50,7 +50,8 @@ namespace Capstone.API.Controllers
 			{
 				Destination = reservation.Destination,
 				User = reservation.User,
-				DurationOfStay = reservation.DurationOfStay,
+				StartDate = reservation.StartDate,
+				EndDate = reservation.EndDate,
 				Price = reservation.Price,
 			};
 

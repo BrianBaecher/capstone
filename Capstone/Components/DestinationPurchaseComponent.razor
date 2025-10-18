@@ -2,6 +2,7 @@
 @using Capstone.Services
 @inject ReservationService reservationService
 @inject SessionState sessionState
+@inject DialogService dialogService
 
 <RadzenCard Variant="Variant.Outlined">
 	<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceEvenly" AlignItems="AlignItems.Center" Gap=".5rem">
@@ -11,15 +12,24 @@
 			<RadzenStack Orientation=Orientation.Horizontal JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
 				<RadzenStack>
 					<RadzenLabel Text="Select Start Date" Component="startDatePicker" />
-					<RadzenDatePicker @bind-Value=startDate
-									  Name="startDatePicker"
-									  Min="DateTime.Today"
-									  Change="@(() => SetNumDays())" />
+					<RadzenStack Orientation="Orientation.Horizontal">
+						<RadzenDatePicker @bind-Value=startDate
+										  Name="startDatePicker"
+										  Min="DateTime.Today"
+										  ShowInput=false
+										  Change="@(() => SetNumDays())" />
+						<RadzenText TextStyle="TextStyle.Body1">
+							Start Date: <RadzenText TextStyle="TextStyle.Body1" class="@(!startDate.HasValue ? "rz-color-warning-dark" : string.Empty)">
+								@(startDate.HasValue? startDate.Value.ToShortDateString() : "No selection")
+							</RadzenText>
+						</RadzenText>
+					</RadzenStack>
 				</RadzenStack>
 				<RadzenStack>
 					<RadzenLabel Text="Select End Date" Component="endDatePicker" />
 					<RadzenDatePicker @bind-Value=endDate
 									  Name="endDatePicker"
+									  ShowInput=false
 									  Min="@(startDate.HasValue? startDate.Value.Date.AddDays(1) : null)"
 									  Change="@(() => SetNumDays())" />
 				</RadzenStack>
@@ -36,9 +46,26 @@
 					</RadzenText>
 				</RadzenRow>
 				<RadzenRow JustifyContent="JustifyContent.SpaceEvenly" AlignItems="AlignItems.Center">
-					<RadzenButton ButtonStyle="ButtonStyle.Success" Text="Reserve" Icon="checked_bag" />
-					<RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Cancel" Icon="delete" />
+					@if (sessionState.CurrentUser == null)
+					{
+						<RadzenText TextStyle="TextStyle.Body1">
+							Please <RadzenButton Click="OnLoginRegisterClick">Login or Register</RadzenButton> in order to reserve a trip.
+						</RadzenText>
+					}
+					else
+					{
+						<RadzenButton ButtonStyle="ButtonStyle.Success"
+									  Text="Reserve"
+									  Icon="checked_bag"
+									  Disabled=@(!startDate.HasValue || !endDate.HasValue )
+									  Click="ReserveTrip" />
+						<RadzenButton ButtonStyle="ButtonStyle.Danger" Text="Cancel" Icon="delete" Click="OnCancelClick" />
+					}
 				</RadzenRow>
+			}
+			@if (successFragment != null)
+			{
+				@successFragment
 			}
 		</RadzenStack>
 	</RadzenStack>
@@ -51,6 +78,8 @@
 	DateTime? startDate;
 	DateTime? endDate;
 	int numDays;
+
+	RenderFragment? successFragment;
 
 	private void SetNumDays()
 	{
@@ -73,12 +102,31 @@
 		TripReservation tripReservation = new()
 		{
 			Destination = Destination,
-			DurationOfStay = TimeSpan.FromDays(numDays),
+			StartDate = startDate!.Value,
+			EndDate = endDate!.Value,
 			User = sessionState.CurrentUser,
 			Price = (float)(numDays * Destination.PricePerDay)
 		};
 
 		var isSuccess = await reservationService.CreateReservationAsync(tripReservation);
+
+		string successMsg = $"Your trip to {Destination.Name} has been reserved!";
+
+		successFragment =@<SuccessIndicator IsSuccess=isSuccess
+						  FailureMessage="Error reserving trip"
+						  SuccessMessage=@successMsg />
+		;
 	}
 
+	private void OnCancelClick()
+	{
+		startDate = null; endDate = null; successFragment = null;
+	}
+
+	private async Task OnLoginRegisterClick()
+	{
+		var modal = await dialogService.OpenAsync<Capstone.Components.Login_Register.LoginComponent>(
+			title: ""
+		);
+	}
 }

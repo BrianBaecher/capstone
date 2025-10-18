@@ -2,12 +2,13 @@
 @using Capstone.Services
 @inject SessionState sessionState
 @inject NavigationManager navigationManager
+@inject DialogService dialogService
 
 <RadzenCard Style="max-width: 420px">
 	<RadzenRow JustifyContent="JustifyContent.Center"
 			   AlignItems="AlignItems.Center"
 			   Gap="1rem">
-		<RadzenProfileMenu>
+		<RadzenProfileMenu @ref=menu Click="OnMenuClick"> 
 			<Template>
 				<RadzenIcon Icon="person" />
 			</Template>
@@ -23,11 +24,7 @@
 						<RadzenProfileMenuItem Text="To Site" Icon="build" Path="" />
 					}
 				}
-				else
-				{
-					<RadzenProfileMenuItem Text="My Trips" Icon="travel" />
-					<RadzenProfileMenuItem Text="Feedback" Icon="feedback" />
-				}
+				<RadzenProfileMenuItem Text="My Trips" Icon="travel" Value="trips" />
 			</ChildContent>
 		</RadzenProfileMenu>
 		<RadzenStack Gap="0">
@@ -45,6 +42,8 @@
 	[Parameter]
 	public EventCallback OnLogout { get; set; }
 
+	RadzenProfileMenu? menu;
+
 	private async Task OnLogoutClick()
 	{
 		sessionState.SetUser(null);
@@ -54,5 +53,29 @@
 	private bool IsAtAdminPage()
 	{
 		return navigationManager.Uri.Contains("/admin");
+	}
+
+	private async Task OpenMyTripsDialog()
+	{
+		@if(User == null) return;
+
+		// passing params to a component inside of dialog requires string, obj dict.
+		var parameters = new Dictionary<string, object?>
+		{
+			[nameof(User)] = User
+		};
+
+		var modal = await dialogService.OpenAsync<MyTripsComponent>(
+			title: "My Trips",
+			parameters: parameters
+		);
+	}
+
+	private async Task OnMenuClick(RadzenProfileMenuItem item)
+	{
+		if(item.Value == "trips")
+		{
+			await OpenMyTripsDialog();
+		}
 	}
 }

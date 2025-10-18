@@ -4,10 +4,10 @@
 @inject DestinationService destinationService
 
 
-<RadzenStack>
+<RadzenStack AlignItems="AlignItems.Center" class="rz-px-2">
 	@if (destinations.Count == 0)
 	{
-		<RadzenText>LOAD</RadzenText>
+		<RadzenText>Loading...</RadzenText>
 	}
 	else
 	{

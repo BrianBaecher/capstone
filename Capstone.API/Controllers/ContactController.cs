@@ -1,5 +1,6 @@
 ﻿using Capstone.API.Models;
 using Capstone.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -7,6 +8,7 @@ namespace Capstone.API.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
+	[Authorize(Roles = "admin")]
 	public class ContactController : ControllerBase
 	{
 		private readonly IMongoCollection<ContactMessage_DB> _contactMessages;
@@ -78,14 +80,12 @@ namespace Capstone.API.Controllers
 			return NoContent();
 		}
 
-
 		[HttpGet("unread")]
 		public async Task<IActionResult> GetUnreadCount([FromQuery] string topic)
 		{
 			var ct = await _contactMessages.CountDocumentsAsync((x) => x.Topic == topic && x.Read == false);
 			return Ok(ct);
 		}
-
 
 		[HttpPatch("{id:length(24)}/read")]
 		public async Task<IActionResult> UpdateReadStatus(string id, [FromBody] bool isRead)

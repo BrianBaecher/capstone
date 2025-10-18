@@ -1,4 +1,5 @@
 using Capstone.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -32,6 +33,7 @@ namespace Capstone.API.Controllers
 			return Ok(testimonial);
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpPost]
 		public async Task<ActionResult<Testimonial_DB>> Create(Testimonial_DB testimonial)
 		{
@@ -39,6 +41,7 @@ namespace Capstone.API.Controllers
 			return CreatedAtAction(nameof(Get), new { id = testimonial.Id }, testimonial);
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpPut("{id:length(24)}")]
 		public async Task<IActionResult> Update(string id, Testimonial_DB updatedTestimonial)
 		{
@@ -48,6 +51,7 @@ namespace Capstone.API.Controllers
 			return NoContent();
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpDelete("{id:length(24)}")]
 		public async Task<IActionResult> Delete(string id)
 		{

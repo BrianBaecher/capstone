@@ -3,21 +3,22 @@
 @inject HttpClient http
 @inject NavigationManager navManager
 
-@if (storyResponse == null)
-{
-	<RadzenIcon Icon="cycle" class="spin" />
-}
-else
-{
-	foreach (var item in storyResponse.Results)
+<RadzenStack Gap="2rem" AlignItems="AlignItems.Center">
+	@if (storyResponse == null)
 	{
-		if (item.Section != "admin")
+		<RadzenIcon Icon="cycle" class="spin" />
+	}
+	else
+	{
+		foreach (var item in storyResponse.Results)
 		{
-			<Capstone.Components.TravelArticle TravelStory="item"
-											    />
+			if (item.Section != "admin")
+			{
+				<Capstone.Components.TravelArticle TravelStory="item" />
+			}
 		}
 	}
-}
+</RadzenStack>
 
 @code {
 	TravelStoryResponse? storyResponse;
@@ -25,8 +26,6 @@ else
 	protected override async Task OnInitializedAsync()
 	{
 		storyResponse = await http.GetFromJsonAsync<TravelStoryResponse>("travelstories.json");
-
-		Console.WriteLine("derp");
 	}
 
 	private void OnArticleNavigate(string url)

@@ -1,6 +1,7 @@
 ﻿@using Capstone.Shared.Models
+@inject IJSRuntime JS
 
-<RadzenCard class="rz-background-color-secondary-light rz-shadow-0 rz-border-radius-0 rz-p-8" Style="max-width: 900px" Variant="Variant.Outlined">
+<RadzenCard class="rz-background-color-base-200 rz-shadow-0 rz-border-radius-0 rz-p-8" Style="max-width: 900px" Variant="Variant.Outlined">
 	<RadzenRow AlignItems="AlignItems.Center">
 		<RadzenColumn>
 			@if (TravelStory.Multimedia.Count > 0)
@@ -46,5 +47,10 @@
 		if (!DateTime.TryParse(dateTimeString, out var date)) return "No date recorded";
 
 		return date.ToShortDateString();
+	}
+
+	private async Task OnReadClick()
+	{
+		await JS.InvokeVoidAsync("window.openUrlInNewTab", TravelStory.Url);
 	}
 }
