@@ -69,7 +69,7 @@
 		if (loginResponse != null)
 		{
 			await sessionState.SetUserAsync(loginResponse.User, loginResponse.Token);
-			// await OnRegistrationSuccess.InvokeAsync();
+			await OnRegistrationSuccess.InvokeAsync();
 		}
 	}
 }

@@ -6,8 +6,14 @@
 				Style="font-size: 48px;"
 				class="filled-icon" />
 	<RadzenText TextStyle="TextStyle.DisplayH6" class="rz-m-0">
-		@(IsSuccess ? SuccessMessage : FailureMessage)
+		@(IsSuccess? SuccessMessage : FailureMessage)
 	</RadzenText>
+	@if (OnOkClick.HasDelegate)
+	{
+		<RadzenButton ButtonStyle=ButtonStyle.Light Click="@((_) => OnOkClick.InvokeAsync())">
+			OK
+		</RadzenButton>
+	}
 </RadzenRow>
 
 @code {
@@ -19,4 +25,7 @@
 
 	[Parameter]
 	public required string FailureMessage { get; set; }
+
+	[Parameter]
+	public EventCallback OnOkClick { get; set; }
 }

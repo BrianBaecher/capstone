@@ -8,7 +8,6 @@ namespace Capstone.API.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	[Authorize(Roles = "admin")]
 	public class ContactController : ControllerBase
 	{
 		private readonly IMongoCollection<ContactMessage_DB> _contactMessages;
@@ -19,6 +18,7 @@ namespace Capstone.API.Controllers
 			_contactMessages = database.GetCollection<ContactMessage_DB>("contactMessages");
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpGet]
 		public async Task<ActionResult<List<ContactMessage>>> Get([FromQuery] int? limit)
 		{
@@ -43,6 +43,7 @@ namespace Capstone.API.Controllers
 			return Ok(messages);
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpGet("{id:length(24)}")]
 		public async Task<ActionResult<ContactMessage>> Get(string id)
 		{
@@ -71,6 +72,7 @@ namespace Capstone.API.Controllers
 			return CreatedAtAction(nameof(Get), new { id = dbMessage.Id }, dbMessage.GetSharedModel());
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpDelete("{id:length(24)}")]
 		public async Task<IActionResult> Delete(string id)
 		{
@@ -80,6 +82,7 @@ namespace Capstone.API.Controllers
 			return NoContent();
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpGet("unread")]
 		public async Task<IActionResult> GetUnreadCount([FromQuery] string topic)
 		{
@@ -87,6 +90,7 @@ namespace Capstone.API.Controllers
 			return Ok(ct);
 		}
 
+		[Authorize(Roles = "admin")]
 		[HttpPatch("{id:length(24)}/read")]
 		public async Task<IActionResult> UpdateReadStatus(string id, [FromBody] bool isRead)
 		{

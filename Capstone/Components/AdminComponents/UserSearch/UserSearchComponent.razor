@@ -1,17 +1,25 @@
 ﻿@using Capstone.Shared.Models
 @namespace Capstone.Components.AdminComponents
 
-<UserDataFilter OnUserEditSelected="SetFormUser" />
+<UserDataFilter OnUserEditSelected="SetFormUser" @ref=userDataFilter />
 @if (formUser != null)
 {
-	<EditUser User=formUser />
+	<EditUser User=formUser
+			  ClearValue="@(() => formUser = null)"
+			  OnUserEditSuccess="OnUserEdited" />
 }
 
 @code {
 	User? formUser;
+	UserDataFilter? userDataFilter;
 
 	private void SetFormUser(User user)
 	{
 		formUser = user;
+	}
+
+	private void OnUserEdited(User editedUser)
+	{
+		userDataFilter?.UpdateEditedUser(editedUser);
 	}
 }

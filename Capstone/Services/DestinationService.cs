@@ -49,6 +49,27 @@ public class DestinationService
 		return await _httpClient.GetFromJsonAsync<bool>(endpoint);
 	}
 
+	public async Task<bool> DeleteDestinationAsync(Destination d)
+	{
+		string id = d.Id ?? string.Empty;
+		if (string.IsNullOrWhiteSpace(id))
+			throw new ArgumentException("id is null or whitespace", nameof(id));
+
+		if (id.Length != 24)
+			Console.WriteLine($"Warning: id '{id}' length is {id.Length}; controller expects 24-char Mongo ObjectId.");
+
+		string endpoint = $"{URI}/{id}";
+		var res = await _httpClient.DeleteAsync(endpoint);
+
+		if (!res.IsSuccessStatusCode)
+		{
+			var body = await res.Content.ReadAsStringAsync();
+			Console.WriteLine($"DELETE {endpoint} failed: {(int)res.StatusCode} {res.ReasonPhrase}. Body: {body}");
+		}
+
+		return res.IsSuccessStatusCode;
+	}
+
 	#region validating
 	private static void EnsureAvifExtension(Destination d)
 	{

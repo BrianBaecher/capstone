@@ -83,7 +83,7 @@ else
 		</RadzenStack>
 	</RadzenTemplateForm>
 }
-}
+
 
 @code {
 	[Parameter]
@@ -95,7 +95,11 @@ else
 	[Parameter]
 	public EventCallback OnCancelForm { get; set; }
 
-	
+	[Parameter]
+	public EventCallback<(bool isSuccess, string succMsg, string failMsg)> OnFormSubmit { get; set; }
+
+	[Parameter]
+	public EventCallback<Destination> OnEditsMade { get; set; }
 
 	const Variant TEXT_BOX_VARIANT = Variant.Outlined;
 
@@ -167,14 +171,24 @@ else
 			isCodeInvalid = !isUnique; // kind of strangely written, but if it isn't unique then it IS invalid...
 			invalidCodeMessage = !isUnique ? $"Destination code: '{d.Code}' is already in use. Enter a new value or revert to original." : string.Empty;
 
-			if (!isUnique) return;
+			if (!isUnique)
+			{
+				await OnFormSubmit.InvokeAsync((false, string.Empty, invalidCodeMessage));
+				return;
+			}
 		}
 
 		await HandleImageSubmission(d);
 
 		// FIXME: may need to return a new copy of edited obj to reflect updates.
 		var isSuccess = await destinationService.UpdateByIdAsync(SelectedDestination.Id, d);
-		Console.WriteLine($"Edit Success? : {isSuccess}");
+
+		if (isSuccess)
+		{
+			await OnEditsMade.InvokeAsync(d);
+		}
+
+		await OnFormSubmit.InvokeAsync((isSuccess, $"Edited {SelectedDestination.Name}", "Failed to Edit"));
 	}
 
 	private async Task OnCreateSubmitAsync(Destination d)
@@ -184,7 +198,8 @@ else
 		await HandleImageSubmission(d);
 
 		var isSuccess = await destinationService.CreateDestinationAsync(d);
-		Console.WriteLine($"Create Success? : {isSuccess}");
+
+		await OnFormSubmit.InvokeAsync((isSuccess, $"Created {d.Name} record", "something went wrong"));
 	}
 
 	private async Task HandleImageSubmission(Destination destination)

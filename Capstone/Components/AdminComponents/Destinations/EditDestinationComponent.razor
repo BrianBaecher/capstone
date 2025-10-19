@@ -4,20 +4,30 @@
 @namespace Capstone.Components.AdminComponents
 
 <RadzenStack>
-	<Capstone.Components.AdminComponents.DestinationSelector OnSelection="OnUpdateSelection" />
+	<Capstone.Components.AdminComponents.DestinationSelector OnSelection="OnUpdateSelection"
+															 @ref=destinationSelector />
 
 	@if (_destination != null)
 	{
 		<Capstone.Components.AdminComponents.DestinationForm IsUpdateForm=true
 															 SelectedDestination="_destination"
-															 OnCancelForm="OnCancelForm" />
+															 OnCancelForm="OnCancelForm"
+															 OnEditsMade="UpdateDataList"
+															 OnFormSubmit="OnFormSubmitted" />
+		if (successIndicatorFragment != null)
+		{
+			@successIndicatorFragment
+		}
 	}
 </RadzenStack>
 
 @code {
 	Destination? _destination;
 
-	private void OnUpdateSelection(Destination d)
+	RenderFragment? successIndicatorFragment;
+	DestinationSelector? destinationSelector;
+
+	private void OnUpdateSelection(Destination? d)
 	{
 		_destination = d;
 	}
@@ -26,5 +36,25 @@
 	{
 		// essentially resetting the destination form component, clear current destination object.
 		_destination = null;
+	}
+
+	private void OnFormSubmitted((bool isSuccess, string succMsg, string failMsg) args)
+	{
+		successIndicatorFragment =@<SuccessIndicator IsSuccess=args.isSuccess
+						  FailureMessage=@args.failMsg
+						  SuccessMessage=@args.succMsg
+						  OnOkClick="@(()=>OnUpdateSelection(null))" />
+	;
+	}
+
+	private void OnSuccessIndicatorOkClick()
+	{
+		// clear selection
+		OnUpdateSelection(null);
+	}
+
+	private void UpdateDataList(Destination d)
+	{
+		destinationSelector?.UpdateDestination(d);
 	}
 }

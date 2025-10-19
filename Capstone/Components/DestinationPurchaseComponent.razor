@@ -9,12 +9,10 @@
 		<DestinationCard Destination="Destination" />
 
 		<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-			<RadzenStack Orientation=Orientation.Horizontal JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
-				<RadzenStack>
-					<RadzenLabel Text="Select Start Date" Component="startDatePicker" />
-					<RadzenStack Orientation="Orientation.Horizontal">
+			<RadzenRow Style="width:400px;">
+				<RadzenColumn Size="6">
+					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
 						<RadzenDatePicker @bind-Value=startDate
-										  Name="startDatePicker"
 										  Min="DateTime.Today"
 										  ShowInput=false
 										  Change="@(() => SetNumDays())" />
@@ -24,16 +22,21 @@
 							</RadzenText>
 						</RadzenText>
 					</RadzenStack>
-				</RadzenStack>
-				<RadzenStack>
-					<RadzenLabel Text="Select End Date" Component="endDatePicker" />
-					<RadzenDatePicker @bind-Value=endDate
-									  Name="endDatePicker"
-									  ShowInput=false
-									  Min="@(startDate.HasValue? startDate.Value.Date.AddDays(1) : null)"
-									  Change="@(() => SetNumDays())" />
-				</RadzenStack>
-			</RadzenStack>
+				</RadzenColumn>
+				<RadzenColumn Size="6">
+					<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+						<RadzenDatePicker @bind-Value=endDate
+										  ShowInput=false
+										  Min="@(startDate.HasValue? startDate.Value.Date.AddDays(1) : null)"
+										  Change="@(() => SetNumDays())" />
+						<RadzenText TextStyle="TextStyle.Body1">
+							End Date: <RadzenText TextStyle="TextStyle.Body1" class="@(!endDate.HasValue ? "rz-color-warning-dark" : string.Empty)">
+								@(endDate.HasValue? endDate.Value.ToShortDateString() : "No selection")
+							</RadzenText>
+						</RadzenText>
+					</RadzenStack>
+				</RadzenColumn>
+			</RadzenRow>
 
 			@if (startDate.HasValue && endDate.HasValue)
 			{

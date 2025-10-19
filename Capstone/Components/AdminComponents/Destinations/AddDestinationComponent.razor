@@ -5,15 +5,36 @@
 <RadzenStack>
 	<DestinationForm IsUpdateForm=false
 					 SelectedDestination="null"
-					 OnCancelForm="OnCancelForm" />
+					 OnCancelForm="ResetForm" 
+					 OnFormSubmit="OnFormSubmitted" />
+	@if(successIndicatorFragment != null)
+	{
+		@successIndicatorFragment
+	}
 </RadzenStack>
 
 @code {
 	Destination _destination = new();
 
-	private void OnCancelForm()
+	bool isFormSubmitted;
+
+	RenderFragment? successIndicatorFragment;
+
+	private void ResetForm()
 	{
 		// reset to blank
+		isFormSubmitted = false;
+		successIndicatorFragment = null;
 		_destination = new();
+		StateHasChanged();
+	}
+
+	private void OnFormSubmitted((bool isSuccess, string succMsg, string failMsg) args)
+	{
+		successIndicatorFragment =@<SuccessIndicator IsSuccess=@args.isSuccess
+						  FailureMessage=@args.failMsg
+						  SuccessMessage="@args.succMsg" 
+						  OnOkClick="ResetForm"
+						  />;
 	}
 }

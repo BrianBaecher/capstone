@@ -56,9 +56,18 @@
 						</RadzenColumn>
 						@if (msg.IsTestimonial)
 						{
-							<RadzenColumn Size="2">
-								<RadzenButton Text="Add to Testimonials" Icon="add" Click="@(() => AddToTestimonials(msg))" />
-							</RadzenColumn>
+							@if (testimonialAddSuccessIndicator != null && msg == addedTestimonialSource)
+							{
+								@testimonialAddSuccessIndicator
+							}
+							else
+							{
+								<RadzenColumn Size="2">
+									<RadzenButton Text="Add to Testimonials"
+												  Icon="add"
+												  Click="@(() => AddToTestimonials(msg))" />
+								</RadzenColumn>
+							}
 						}
 					</RadzenRow>
 				</RadzenStack>
@@ -77,6 +86,8 @@
 	[Parameter]
 	public EventCallback<(ContactMessage.MessageTopic topic, bool isIncrease)> OnReadStatusChange { get; set; }
 
+	RenderFragment? testimonialAddSuccessIndicator;
+	ContactMessage? addedTestimonialSource;
 
 	private string GetMessageEmail(ContactMessage msg)
 	{
@@ -111,6 +122,9 @@
 		if (isDeleted)
 		{
 			Messages.Remove(msg);
+
+			if (msg == addedTestimonialSource) addedTestimonialSource = null;
+
 			StateHasChanged();
 		}
 	}
@@ -129,9 +143,15 @@
 			Content = msg.Content
 		};
 
-		var res = await testimonialService.CreateAsync(testimonial);
+		bool isSuccess = await testimonialService.CreateAsync(testimonial) != null;
 
-		return res != null;
+		testimonialAddSuccessIndicator =@<SuccessIndicator IsSuccess=isSuccess SuccessMessage="Added to Testimonials" FailureMessage="Something went wrong" OnOkClick="@(() => DeleteMessageAsync(msg))" />;
+
+		addedTestimonialSource = msg;
+
+		await SetMessageReadStatusAsync(msg, true);
+
+		return isSuccess;
 	}
 
 	private string? TreatDisplayName(string name)

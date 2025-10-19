@@ -12,7 +12,6 @@
 
 		public DateTime EndDate { get; set; }
 
-
 		public float Price { get; set; }
 	}
 }

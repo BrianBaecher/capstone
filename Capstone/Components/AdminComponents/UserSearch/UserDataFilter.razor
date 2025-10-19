@@ -109,6 +109,16 @@
 		await OnUserEditSelected.InvokeAsync(user);
 	}
 
+	public void UpdateEditedUser(User editedUser)
+	{
+		var idx = users?.FindIndex(x => x.Id == editedUser.Id);
+
+		if (!idx.HasValue) return;
+
+		users![idx.Value] = editedUser;
+		grid?.Reload();
+	}
+
 	private async Task DeleteUser(User user)
 	{
 		//TODO: confirmation dialog

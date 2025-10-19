@@ -3,22 +3,34 @@
 @inject AuthService authService
 @namespace Capstone.Components.AdminComponents
 
-<RadzenTemplateForm TItem="User" Submit="OnSubmit">
-	<RadzenFormField Text="Username">
-		<RadzenTextBox @bind-Value=formModel.Username />
-	</RadzenFormField>
-	<RadzenFormField Text="Email Address">
-		<RadzenTextBox @bind-Value=formModel.Email />
-	</RadzenFormField>
-	<RadzenFormField Text="Role">
-		<RadzenDropDown TValue="string" Data="roleData" AllowSelectAll=false @bind-Value=formModel.Role />
-	</RadzenFormField>
-	<RadzenButton ButtonType="ButtonType.Submit" Text="Submit" />
-</RadzenTemplateForm>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
 
+	<RadzenTemplateForm TItem="User">
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+			<RadzenFormField Text="Username">
+				<RadzenTextBox @bind-Value=formModel.Username />
+			</RadzenFormField>
+			<RadzenFormField Text="Email Address">
+				<RadzenTextBox @bind-Value=formModel.Email />
+			</RadzenFormField>
+			<RadzenFormField Text="Role">
+				<RadzenDropDown TValue="string" Data="roleData" AllowSelectAll=false @bind-Value=formModel.Role />
+			</RadzenFormField>
+			<RadzenButton ButtonType="ButtonType.Submit" Text="Submit" Click="@((_)=>OnSubmit(formModel))" />
+			<RadzenButton ButtonStyle=ButtonStyle.Warning Text="Cancel" Click="@((_) => ClearValue.InvokeAsync())" />
+		</RadzenStack>
+	</RadzenTemplateForm>
+
+</RadzenStack>
 @code {
 	[Parameter]
 	public required User User { get; set; }
+
+	[Parameter]
+	public EventCallback ClearValue { get; set; }
+
+	[Parameter]
+	public EventCallback<User> OnUserEditSuccess { get; set; }
 
 	bool isUpdate;
 
@@ -43,5 +55,11 @@
 
 		var result = await authService.UpdateUserAsync(user);
 
+		if(result != null)
+		{
+			await OnUserEditSuccess.InvokeAsync(result);
+		}
+
+		await ClearValue.InvokeAsync();
 	}
 }

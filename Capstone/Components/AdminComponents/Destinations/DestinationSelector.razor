@@ -12,7 +12,7 @@
 	<Columns>
 		<RadzenDataGridColumn Width="50px" Title="#" Filterable="false" Sortable="false" TextAlign="TextAlign.Center">
 			<Template Context="data">
-				@(Array.IndexOf(destinations, data) + 1)
+				@(destinations.IndexOf(data) + 1)
 			</Template>
 		</RadzenDataGridColumn>
 		<RadzenDataGridColumn Property="Name" Title="Name">
@@ -37,6 +37,7 @@
 				<RadzenStack>
 					<RadzenText TextStyle="TextStyle.Subtitle1">@data.Code</RadzenText>
 					<RadzenButton ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="build" class="rz-m-1" Text="Edit" Click="() => ReportEditSelection(data)" />
+					<RadzenButton ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Shade="Shade.Dark" Icon="delete" class="rz-m-1" Text="Delete" Click="() => OnDeleteDestination(data)" />
 				</RadzenStack>
 			</Template>
 		</RadzenDataGridColumn>
@@ -50,22 +51,44 @@
 
 	RadzenDataGrid<Destination> grid;
 
-	Destination[] destinations = [];
+	List<Destination> destinations = new();
 
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
 
-		destinations = await destinationService.GetAllAsync();
+		var asArr = await destinationService.GetAllAsync();
+
+		destinations = asArr.ToList();
 	}
 
-	void Change(string text)
+	public void RefreshGrid()
 	{
+		grid?.Reload();
 	}
 
 	void ReportEditSelection(Destination d)
 	{
-		Console.WriteLine($"Chosen to edit {d.Name}");
 		OnSelection.InvokeAsync(d);
+	}
+
+	private async Task OnDeleteDestination(Destination d)
+	{
+		var isDeleteSuccess = await destinationService.DeleteDestinationAsync(d);
+
+		if (isDeleteSuccess)
+		{
+			destinations.Remove(d);
+			RefreshGrid();
+		}
+	}
+
+	public void UpdateDestination(Destination updated)
+	{
+		var idx = destinations.FindIndex(x => x.Id == updated.Id);
+
+		if (idx == -1) return;
+		destinations[idx] = updated;
+		RefreshGrid();
 	}
 }
