@@ -17,13 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pages", "pages", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		Reflection.md = Reflection.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pdf", "pdf", "{720EA9B2-C961-4D47-B911-B2DB7D47AD9F}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\Desktop\School\capstone\Baecher_mod1.pdf = ..\..\..\..\Desktop\School\capstone\Baecher_mod1.pdf
-		..\..\..\..\Desktop\School\capstone\Baecher_mod3.pdf = ..\..\..\..\Desktop\School\capstone\Baecher_mod3.pdf
-		..\..\..\..\Desktop\School\capstone\Baecher_mod5.pdf = ..\..\..\..\Desktop\School\capstone\Baecher_mod5.pdf
+		_config.yml = _config.yml
 	EndProjectSection
 EndProject
 Global
@@ -50,7 +44,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
-		{720EA9B2-C961-4D47-B911-B2DB7D47AD9F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E94278F5-0076-4D65-92C1-72082801176F}
