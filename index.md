@@ -3,13 +3,13 @@
 
 [Go to Project Summary](#project-summary)
 
-[Milestone 1 PDF](pages/pdf/Baecher_mod1.pdf)
+[Milestone 1 PDF](Baecher_mod1.pdf)
 
 
-[Milestone 2 PDF](pages/pdf/Baecher_mod3.pdf)
+[Milestone 2 PDF](Baecher_mod3.pdf)
 
 
-[Milestone 3 PDF](pages/pdf/Baecher_mod5.pdf)
+[Milestone 3 PDF](Baecher_mod5.pdf)
 
 
 
